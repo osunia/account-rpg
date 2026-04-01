@@ -594,7 +594,7 @@ mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${m
       for(let i=0; i<fDay; i++) grid.innerHTML += `<div class="day-cell empty"></div>`;
       for(let d=1; d<=dInM; d++) {
         let amt = dailyTotals[d] || 0, c = 'damage-0';
-        if (amt>0 && amt<=10000) c='damage-1'; else if (amt>10000 && amt<=30000) c='damage-2'; else if (amt>30000 && amt<=50000) c='damage-3'; else if (amt>50000) c='damage-4';
+        if (amt>0 && amt<=10000) c='damage-1'; else if (amt>10000 && amt<=30000) c='damage-2'; else if (amt>30000 && amt<=60000) c='damage-3'; else if (amt>60000) c='damage-4';
         grid.innerHTML += `<div class="day-cell ${c}" title="${amt.toLocaleString()}원">${d}</div>`;
       }
     }
