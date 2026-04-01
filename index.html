@@ -351,21 +351,17 @@
       { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" }
     ];
 
-// ✨ 텍스트 이모지를 MS 3D 이미지 태그로 바꿔주는 똑똑한 변환기!
+    // ✨ 텍스트 이모지를 MS 3D 이미지 태그로 바꿔주는 똑똑한 변환기! (GAS 수정 방지용)
     function getEmojiImage(emojiStr, type = "node") {
       const found = monsterDic.find(m => m.emoji === emojiStr);
       let imgPath = found ? found.img : null;
-      
-      // ✨ 수정: 오류 없는 100% 확실한 MS 3D 고양이(Cat) 이미지 경로로 고정!
-      if (!imgPath && emojiStr === "😺") {
-        imgPath = "Grinning%20cat/3D/grinning_cat_3d.png"; 
-      }
+      if (!imgPath && emojiStr === "😺") imgPath = "Grinning%20cat/3D/grinning_cat_3d.png"; // 용사 고양이
       
       if (imgPath) {
         const className = type === "boss" ? "emoji-img boss-card-emoji" : (emojiStr === "😺" ? "emoji-img hero-emoji" : "emoji-img node-emoji");
-        return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}" onerror="this.outerHTML='${emojiStr}'">`;
+        return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}">`;
       }
-      return emojiStr; 
+      return emojiStr; // 혹시 매칭 안 되면 텍스트 반환
     }
 
     function getTodayDateString() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
