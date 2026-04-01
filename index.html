@@ -72,42 +72,83 @@
     .summon-btn { position: absolute; bottom: 12px; left: 12px; z-index: 20; padding: 6px 10px; font-size: 13px; background: #fff; border: var(--border-thick); box-shadow: var(--box-shadow); border-radius: 12px; font-weight: bold; cursor: pointer; color: var(--point-blue); }
     .summon-btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 var(--black); }
 
-    /* ✨ 둥둥 떠다니는 애니메이션 정의 */
+    /* 1️⃣ 애니메이션 정의: 일반 몹용과 용사용 분리 */
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-5px); }
     }
+    @keyframes floatHero {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-7px); } /* 용사는 좀 더 역동적으로! */
+    }
 
-/* 텍스트 이모지 대신 들어갈 MS 3D 이미지 스타일 */
+    /* 2️⃣ 이미지 공통 스타일 (MS 3D 이미지 전용) */
     .emoji-img {
       object-fit: contain;
-      filter: drop-shadow(2px 2px 0px var(--black));
-      /* ✨ 숨쉬는 애니메이션 적용 */
-      animation: float 2.5s ease-in-out infinite; 
+      filter: drop-shadow(2px 2px 0px var(--black)); /* 카툰 스타일 그림자 */
+      transition: all 0.1s;
     }
-    /* ✨ 수정: 용사 고양이는 몹들보다 살짝 더 크게(55px) 늠름하게! */
-    .hero-emoji { width: 55px; height: 55px; margin-top: -10px; }
-    .node-emoji { width: 45px; height: 45px; } 
-    .boss-card-emoji { width: 22px; height: 22px; vertical-align: middle; margin-right: 5px; filter: drop-shadow(1px 1px 0 var(--black)); animation: none; }
-    
-    /* 몹(노드) 스타일 */
+
+    /* 3️⃣ 용사(고양이+무기) 전용 스타일 */
+    .hero-node {
+      position: absolute;
+      z-index: 100; /* 몹들보다 무조건 위에 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -30px; margin-top: -35px; /* 중앙 정렬 오프셋 */
+      animation: floatHero 2s ease-in-out infinite; /* 컨테이너 전체가 둥둥 뜀 */
+      pointer-events: none; /* 고양이가 클릭을 방해하지 않게 */
+    }
+
+    .hero-emoji {
+      width: 55px; height: 55px;
+      filter: drop-shadow(3px 3px 0px var(--black)); /* 용사 전용 굵은 그림자 */
+    }
+
+    /* ✨ 무기 이미지 뒤집기 핵심 스타일 */
+    .hero-weapon {
+      width: 35px; height: 35px;
+      position: absolute;
+      right: -12px; bottom: 0px; /* 고양이 손 근처 위치 */
+      z-index: -1; /* 고양이 몸통 뒤로 살짝 겹치게 */
+      
+      /* 💡 좌우(-1) & 상하(-1) 뒤집기 마법! */
+      transform: scale(-1, -1); 
+      
+      /* 뒤집혔으므로 그림자 방향도 미세하게 조정 */
+      filter: drop-shadow(-2px -2px 0px var(--black)); 
+    }
+
+    /* 4️⃣ 몬스터(노드) 공통 스타일 */
     .map-node {
-      position: absolute; margin-left: -20px; margin-top: -20px;
+      position: absolute; 
+      margin-left: -20px; margin-top: -20px;
       display: flex; justify-content: center; align-items: center;
       cursor: pointer; z-index: 10;
       transition: transform 0.1s;
-      /* ✨ 수정: 이미지를 못 불러와서 텍스트로 뜰 때를 대비해 기본 크기(40px) 든든하게 지정 */
-      font-size: 40px; 
-      font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+      font-size: 40px; /* 텍스트 대비용 */
     }
-    
-    /* ✨ 수정: 몬스터들이 각자 다른 타이밍에 숨을 쉬도록 엇박자 추가 */
-    .map-node:nth-child(even) .emoji-img { animation-delay: -0.7s; }
-    .map-node:nth-child(3n) .emoji-img { animation-delay: -1.4s; }
+
+    .node-emoji {
+      width: 45px; height: 45px;
+      animation: float 2.5s ease-in-out infinite; /* 몹들만 개별적으로 숨쉼 */
+    }
+
+    /* 몬스터들이 각자 다른 타이밍에 숨을 쉬도록 엇박자 추가 */
+    .map-node:nth-child(even) .node-emoji { animation-delay: -0.7s; }
+    .map-node:nth-child(3n) .node-emoji { animation-delay: -1.4s; }
 
     .map-node:active { transform: scale(0.9); }
     .map-node.active { z-index: 50; }
-    .hero-node { z-index: 11; }
+
+    /* 5️⃣ 기타 UI용 이모지 (기록, 보스카드 등) */
+    .boss-card-emoji { 
+      width: 22px; height: 22px; 
+      vertical-align: middle; 
+      margin-right: 5px; 
+      filter: drop-shadow(1px 1px 0 var(--black)); 
+    }
 
     /* 말풍선 기본 스타일 유지 및 트랜지션 추가 */
     .speech-bubble {
@@ -354,17 +395,23 @@
       { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" }
     ];
 
-function getEmojiImage(emojiStr, type = "node") {
+// ✨ 텍스트 이모지를 MS 3D 이미지 태그로 바꿔주는 똑똑한 변환기!
+    function getEmojiImage(emojiStr, type = "node") {
       const found = monsterDic.find(m => m.emoji === emojiStr);
       let imgPath = found ? found.img : null;
       
-      // ✨ 수정: 100% 실존하는 MS 3D 고양이 경로 (Cat/3D/cat_3d.png)
       if (!imgPath && emojiStr === "😺") {
-        imgPath = "Grinning%20cat/3D/grinning_cat_3d.png"; 
+        imgPath = "Cat/3D/cat_3d.png"; 
       }
       
       if (imgPath) {
-        const className = type === "boss" ? "emoji-img boss-card-emoji" : (emojiStr === "😺" ? "emoji-img hero-emoji" : "emoji-img node-emoji");
+        let className = "";
+        // ✨ 클래스 부여 로직 정리
+        if (type === "boss") className = "emoji-img boss-card-emoji";
+        else if (type === "weapon") className = "emoji-img hero-weapon"; // ✨ 무기용 클래스 추가
+        else if (emojiStr === "😺") className = "emoji-img hero-emoji";
+        else className = "emoji-img node-emoji monster-emoji"; // ✨ 몹들에게만 monster-emoji 클래스 추가
+
         return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}" onerror="this.outerHTML='${emojiStr}'">`;
       }
       return emojiStr; 
@@ -411,8 +458,12 @@ function getEmojiImage(emojiStr, type = "node") {
       // 1. 먼저 SVG 경로(선)와 시작점의 고양이를 그립니다.
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
 
-mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">${getEmojiImage("😺")}</div>`;
+// ✅ 수정 코드 (고양이와 무기를 함께 넣는 컨테이너 구조로 변경!)
+const catHtml = getEmojiImage("😺");
+// MS 3D 단검 이미지를 가져옵니다. monsterDic에 단검(🗡️)이 이미 있습니다!
+const daggerHtml = getEmojiImage("🗡️", "weapon"); 
 
+mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">${catHtml}${daggerHtml}</div>`;
       for(let i=1; i < mapCoordinates.length; i++) { 
         pathD += `L ${mapCoordinates[i].x} ${mapCoordinates[i].y} `; 
       }
