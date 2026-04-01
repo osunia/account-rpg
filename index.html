@@ -70,6 +70,15 @@
     .summon-btn { position: absolute; bottom: 15px; left: 15px; z-index: 20; padding: 8px 12px; font-size: 14px; background: #fff; border: 2px solid var(--black); box-shadow: 3px 3px 0 var(--black); font-weight: bold; cursor: pointer; color: var(--point-blue); }
     .summon-btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 var(--black); }
 
+/* ✨ 텍스트 이모지 대신 들어갈 MS 3D 이미지 스타일 */
+    .emoji-img {
+      object-fit: contain;
+      filter: drop-shadow(3px 3px 0px var(--black)); /* 카툰 그림자 완벽 호환! */
+    }
+    .hero-emoji { width: 45px; height: 45px; margin-top: -5px; }
+    .node-emoji { width: 50px; height: 50px; }
+    .boss-card-emoji { width: 24px; height: 24px; vertical-align: middle; margin-right: 5px; filter: drop-shadow(2px 2px 0 var(--black)); }
+    
     /* 몹(노드) 스타일 */
     .map-node {
       position: absolute; margin-left: -20px; margin-top: -20px;
@@ -306,12 +315,36 @@
       { x: 30, y: 30 }, { x: 10, y: 30 }, { x: 10, y: 90 }, { x: 90, y: 90 }  
     ];
 
+// ✨ MS 오픈소스 이모지 깃허브 링크 맵핑
+    const MS_EMOJI_BASE = "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/";
+    
     const monsterDic = [
-      { name: "유령", emoji: "👻" }, { name: "외계인", emoji: "👾" }, { name: "로봇", emoji: "🤖" },
-      { name: "피자", emoji: "🍕" }, { name: "케이크", emoji: "🍰" }, { name: "늑대", emoji: "🐺" },
-      { name: "악어", emoji: "🐊" }, { name: "해파리", emoji: "🪼" }, { name: "잭오랜턴", emoji: "🎃" },
-      { name: "마왕", emoji: "👑" }, { name: "골렘", emoji: "🪨" }, { name: "아보카도", emoji: "🥑" }
+      { name: "유령", emoji: "👻", img: "Ghost/3D/ghost_3d.png" }, 
+      { name: "외계인", emoji: "👾", img: "Alien%20monster/3D/alien_monster_3d.png" }, 
+      { name: "로봇", emoji: "🤖", img: "Robot/3D/robot_3d.png" },
+      { name: "피자", emoji: "🍕", img: "Pizza/3D/pizza_3d.png" }, 
+      { name: "케이크", emoji: "🍰", img: "Shortcake/3D/shortcake_3d.png" }, 
+      { name: "늑대", emoji: "🐺", img: "Wolf/3D/wolf_3d.png" },
+      { name: "악어", emoji: "🐊", img: "Crocodile/3D/crocodile_3d.png" }, 
+      { name: "해파리", emoji: "🪼", img: "Jellyfish/3D/jellyfish_3d.png" }, 
+      { name: "드래곤", emoji: "🐉", img: "Dragon/3D/dragon_3d.png" },
+      { name: "마왕", emoji: "👑", img: "Crown/3D/crown_3d.png" }, 
+      { name: "골렘", emoji: "🪨", img: "Rock/3D/rock_3d.png" }, 
+      { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" }
     ];
+
+    // ✨ 텍스트 이모지를 MS 3D 이미지 태그로 바꿔주는 똑똑한 변환기! (GAS 수정 방지용)
+    function getEmojiImage(emojiStr, type = "node") {
+      const found = monsterDic.find(m => m.emoji === emojiStr);
+      let imgPath = found ? found.img : null;
+      if (!imgPath && emojiStr === "😺") imgPath = "Grinning%20cat/3D/grinning_cat_3d.png"; // 용사 고양이
+      
+      if (imgPath) {
+        const className = type === "boss" ? "emoji-img boss-card-emoji" : (emojiStr === "😺" ? "emoji-img hero-emoji" : "emoji-img node-emoji");
+        return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}">`;
+      }
+      return emojiStr; // 혹시 매칭 안 되면 텍스트 반환
+    }
 
     function getTodayDateString() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
     function getMonthString() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
@@ -342,12 +375,17 @@
 
       mainBossArea.innerHTML = `
         <div class="main-boss-card">
-          <div><h3>${mainBoss.emoji} ${mainBoss.name}</h3><p>필요 예산: ${mainBoss.hp.toLocaleString()} 원</p></div>
+          <div>
+            <h3 style="display:flex; align-items:center;">
+              ${getEmojiImage(mainBoss.emoji, "boss")} ${mainBoss.name}
+            </h3>
+            <p>필요 예산: ${mainBoss.hp.toLocaleString()} 원</p>
+          </div>
           <div class="main-boss-dday">${calculateDday(mainBoss.targetDate)}</div>
         </div>`;
 
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
-      mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">😺</div>`;
+      mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">${getEmojiImage("😺")}</div>`;
 
       const allBosses = state.bosses;
       const totalNodes = mapCoordinates.length - 1; 
@@ -367,7 +405,7 @@
           const boss = bossNodes[i];
           mapNodesContainer.innerHTML += `
             <div class="map-node" style="left: ${mapCoordinates[i].x}%; top: ${mapCoordinates[i].y}%;" onclick="toggleBubble(this, event)">
-              ${boss.emoji}
+              ${getEmojiImage(boss.emoji)}
               <div class="speech-bubble">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
             </div>`;
         }
