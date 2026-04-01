@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#ffffff">
   <title>예산 디펜스 RPG</title>
   <style>
     /* 🎨 CSS: 카툰/네오브루탈리즘 테마 */
@@ -19,7 +20,7 @@
     }
     body {
       margin: 0; padding: 0;
-      background-color: var(--black); 
+      background-color: #ffffff; 
       color: var(--black);
       font-family: 'Pretendard', 'Arial', sans-serif;
       display: flex; justify-content: center;
@@ -76,15 +77,16 @@
       50% { transform: translateY(-5px); }
     }
 
-    /* 텍스트 이모지 대신 들어갈 MS 3D 이미지 스타일 */
+/* 텍스트 이모지 대신 들어갈 MS 3D 이미지 스타일 */
     .emoji-img {
       object-fit: contain;
       filter: drop-shadow(2px 2px 0px var(--black));
-      /* ✨ 수정: 숨쉬는 애니메이션 적용 */
+      /* ✨ 숨쉬는 애니메이션 적용 */
       animation: float 2.5s ease-in-out infinite; 
     }
-    .hero-emoji { width: 45px; height: 45px; margin-top: -5px; }
-    .node-emoji { width: 45px; height: 45px; } /* 살짝 다이어트 */
+    /* ✨ 수정: 용사 고양이는 몹들보다 살짝 더 크게(55px) 늠름하게! */
+    .hero-emoji { width: 55px; height: 55px; margin-top: -10px; }
+    .node-emoji { width: 45px; height: 45px; } 
     .boss-card-emoji { width: 22px; height: 22px; vertical-align: middle; margin-right: 5px; filter: drop-shadow(1px 1px 0 var(--black)); animation: none; }
     
     /* 몹(노드) 스타일 */
@@ -93,6 +95,8 @@
       display: flex; justify-content: center; align-items: center;
       cursor: pointer; z-index: 10;
       transition: transform 0.1s;
+      /* ✨ 수정: 이미지를 못 불러와서 텍스트로 뜰 때를 대비해 기본 크기(40px) 든든하게 지정 */
+      font-size: 40px; 
       font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
     }
     
@@ -211,8 +215,8 @@
 
     <div class="map-container">
       <button class="summon-btn cartoon-btn" onclick="openModal('summonModal')">➕ 몬스터 소환</button>
-      <svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <path id="mapPath" d="" fill="none" stroke="#fae9a5" stroke-width="25" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8, 8" vector-effect="non-scaling-stroke" />
+<svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path id="mapPath" d="" fill="none" stroke="#fae9a5" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0, 40" vector-effect="non-scaling-stroke" />
       </svg>
       <div id="mapNodesContainer"></div>
     </div>
@@ -342,14 +346,18 @@
       { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" }
     ];
 
+// ✨ 텍스트 이모지를 MS 3D 이미지 태그로 바꿔주는 똑똑한 변환기!
     function getEmojiImage(emojiStr, type = "node") {
       const found = monsterDic.find(m => m.emoji === emojiStr);
       let imgPath = found ? found.img : null;
-      if (!imgPath && emojiStr === "😺") imgPath = "Grinning%20cat/3D/grinning_cat_3d.png"; 
+      
+      // ✨ 수정: 주소가 확실한 기본 고양이(Cat face) 3D 이미지로 교체!
+      if (!imgPath && emojiStr === "😺") imgPath = "Cat%20face/3D/cat_face_3d.png"; 
       
       if (imgPath) {
         const className = type === "boss" ? "emoji-img boss-card-emoji" : (emojiStr === "😺" ? "emoji-img hero-emoji" : "emoji-img node-emoji");
-        return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}">`;
+        // ✨ 수정: 만약 인터넷 문제 등으로 이미지가 깨지면(onerror), 즉시 원래 텍스트 이모지로 돌아가도록 방어막 추가!
+        return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}" onerror="this.outerHTML='${emojiStr}'">`;
       }
       return emojiStr; 
     }
