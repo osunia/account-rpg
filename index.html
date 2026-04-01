@@ -316,28 +316,7 @@
     function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
     function showAlert(msg) { document.getElementById('alertMessage').innerHTML = msg; document.getElementById('customAlert').style.display = 'flex'; }
 
-    // ✨ 수정된 부분: 마나가 계산(충전)되면 true를 반환하여 버그를 막습니다.
-    function calculateMana() {
-      const today = new Date(); const todayStr = getTodayDateString(); const currentMonthStr = getMonthString();
-      let msgs = [];
-      let isChanged = false;
-
-      if (state.lastResetMonth !== currentMonthStr && today.getDate() >= state.settings.resetDay) {
-        state.currentMana = state.settings.baseMana; state.lastResetMonth = currentMonthStr; state.lastLoginDate = todayStr;
-        msgs.push(`새 주기 시작! 마나 ${state.settings.baseMana} 갱신! 🔄`);
-        isChanged = true;
-      }
-      if (state.lastLoginDate !== todayStr) {
-        const diffDays = Math.ceil(Math.abs(new Date(todayStr) - new Date(state.lastLoginDate)) / 86400000);
-        if(diffDays > 0) {
-          state.currentMana += (state.settings.dailyMana * diffDays); state.lastLoginDate = todayStr;
-          msgs.push(`자리를 비운 ${diffDays}일 간 ${(state.settings.dailyMana * diffDays).toLocaleString()} 마나 충전! ⚡`);
-          isChanged = true;
-        }
-      }
-      if(msgs.length > 0) showAlert(msgs.join("<br>"));
-      return isChanged;
-    }
+    // 🐛 버그 원인이었던 클라이언트 측 calculateMana() 함수는 삭제했습니다!
 
     function render() {
       document.getElementById('manaDisplay').innerText = `${state.currentMana.toLocaleString()} 원`;
@@ -369,14 +348,13 @@
       mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">😺</div>`;
 
       const allBosses = state.bosses;
-      const totalNodes = mapCoordinates.length - 1; // 11개의 빈 노드 자리
+      const totalNodes = mapCoordinates.length - 1; 
       
-      // ✨ 수정된 부분: 몹 개수에 비례해 전체 맵에 골고루 분산시킵니다 (마지막 몹은 끝으로)
       const bossNodes = {};
       if (allBosses.length > 0) {
           allBosses.forEach((boss, index) => {
               let nodeIndex = Math.max(1, Math.round(((index + 1) / allBosses.length) * totalNodes));
-              while(bossNodes[nodeIndex] && nodeIndex > 1) nodeIndex--; // 자리가 겹치면 앞으로 한 칸 당김
+              while(bossNodes[nodeIndex] && nodeIndex > 1) nodeIndex--; 
               bossNodes[nodeIndex] = boss;
           });
       }
@@ -385,7 +363,6 @@
         pathD += `L ${mapCoordinates[i].x} ${mapCoordinates[i].y} `; 
         if (bossNodes[i]) {
           const boss = bossNodes[i];
-          // ✨ 수정된 부분: 이벤트 객체를 넘겨 말풍선 위치 조정에 활용
           mapNodesContainer.innerHTML += `
             <div class="map-node" style="left: ${mapCoordinates[i].x}%; top: ${mapCoordinates[i].y}%;" onclick="toggleBubble(this, event)">
               ${boss.emoji}
@@ -396,7 +373,6 @@
       mapPath.setAttribute('d', pathD.trim());
     }
 
-    // ✨ 바탕화면 터치 시 말풍선 닫기
     document.addEventListener('click', () => {
       document.querySelectorAll('.map-node').forEach(n => {
         n.classList.remove('active');
@@ -405,9 +381,8 @@
       });
     });
 
-    // ✨ 수정된 부분: 화면 밖으로 튀어나가는 말풍선을 똑똑하게 밀어넣음
     function toggleBubble(element, event) {
-      event.stopPropagation(); // 맵 터치 시 닫히는 기능 방지
+      event.stopPropagation();
       const isActive = element.classList.contains('active');
       
       document.querySelectorAll('.map-node').forEach(n => { 
@@ -501,6 +476,7 @@
     }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
+    // ✨ 설정 저장 시에도 클라이언트의 계산을 없애고 그대로 저장합니다.
     function saveSettings() {
       const newMana = parseInt(document.getElementById('setEditMana').value);
       if(!isNaN(newMana)) state.currentMana = newMana;
@@ -508,10 +484,11 @@
       state.settings.baseMana = parseInt(document.getElementById('setBaseMana').value);
       state.settings.dailyMana = parseInt(document.getElementById('setDailyMana').value);
       
-      calculateMana(); render(); saveState(); closeModal('settingsModal'); 
+      render(); saveState(); closeModal('settingsModal'); 
       showAlert("설정 저장 완료! ✨");
     }
 
+    // 기록 및 캘린더 로직 유지
     function switchLogTab(tab) {
       document.getElementById('tabList').classList.toggle('active', tab === 'list');
       document.getElementById('tabGrid').classList.toggle('active', tab === 'grid');
@@ -549,8 +526,9 @@
       }
     }
 
+    // ✨ 서버 통신 함수 개편: 백엔드가 계산해준 데이터를 그대로 받아오기만 합니다.
     function init() {
-      if(!GAS_URL || GAS_URL.includes("여기에_본인의_주소")) {
+      if(!GAS_URL || GAS_URL.includes("여기에_고객님의_GAS_URL")) {
         showAlert("GAS URL이 설정되지 않았습니다! 코드에 URL을 넣어주세요.");
         render(); return;
       }
@@ -559,19 +537,20 @@
       fetch(GAS_URL)
         .then(response => response.json())
         .then(serverState => {
-          if(serverState && (serverState.lastLoginDate !== "" || (serverState.bosses && serverState.bosses.length > 0))) {
+          if(serverState) {
             state = serverState;
+            // 백엔드가 마나 충전 후 남긴 메시지가 있다면 알림 띄우기
+            if (state.syncMessages && state.syncMessages.length > 0) {
+              showAlert(state.syncMessages.join("<br>"));
+            }
           }
-          // ✨ 수정된 부분: 마나가 계산되어 변동이 생겼다면 곧바로 서버에 저장
-          const needsSave = calculateMana(); 
           render(); 
           hideLoading();
-          if(needsSave) saveState();
         })
         .catch(err => {
           hideLoading();
-          showAlert("서버 통신 실패! 로컬 데이터로 임시 시작합니다. 🐛");
-          calculateMana(); render();
+          showAlert("서버 통신 실패! 이전 데이터로 접속됩니다. 🐛");
+          render();
         });
     }
 
