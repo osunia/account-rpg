@@ -60,11 +60,12 @@
     .main-boss-card p { margin: 0; font-size: 11px; font-weight: bold; }
     .main-boss-dday { font-size: 18px; font-weight: 900; text-shadow: 1px 1px 0 var(--black); }
 
-    /* 구불구불 맵 영역 */
+/* 맵 컨테이너에 커서 추가 (모바일 클릭 인식 강화) */
     .map-container {
       flex: 1; position: relative; background-color: #66ab5e;
       background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px;
       overflow: hidden; 
+      cursor: pointer; /* ✨ 추가: 이 설정이 있어야 모바일에서 빈 공간 클릭을 인식합니다. */
     }
     .map-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
     
@@ -108,14 +109,16 @@
     .map-node.active { z-index: 50; }
     .hero-node { z-index: 11; }
 
-    /* 말풍선 */
+    /* 말풍선 기본 스타일 유지 및 트랜지션 추가 */
     .speech-bubble {
-      position: absolute; bottom: 80%; left: 50%; transform: translateX(-50%);
-      background: #fff; border: var(--border-thick); padding: 4px 8px; border-radius: 8px;
+      position: absolute; bottom: 85%; left: 50%; transform: translateX(-50%);
+      background: #fff; border: var(--border-thick); padding: 5px 10px; border-radius: 8px;
       font-family: 'Pretendard', 'Arial', sans-serif;
       font-size: 11px; font-weight: bold; white-space: nowrap; color: var(--black);
       box-shadow: 2px 2px 0 var(--black); display: none; z-index: 60; text-align: center;
+      pointer-events: none; /* 말풍선 자체는 클릭 방해 안 되게 */
     }
+    
     .speech-bubble::after { 
       content: ''; position: absolute; top: 100%; left: 50%; margin-left: -4px;
       border-width: 4px; border-style: solid; border-color: var(--black) transparent transparent transparent;
@@ -456,34 +459,67 @@ mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${m
       }
     }
 
-    function toggleBubble(element, event) {
-      event.stopPropagation();
-      const isActive = element.classList.contains('active');
-      
-      document.querySelectorAll('.map-node').forEach(n => { 
+    // ✨ 1. 모든 말풍선을 닫는 공용 함수
+    function closeAllBubbles() {
+      document.querySelectorAll('.map-node').forEach(n => {
         n.classList.remove('active');
         const b = n.querySelector('.speech-bubble');
-        if(b) { b.style = ''; b.classList.remove('flip-down'); }
+        if(b) {
+          b.style.display = 'none'; // 확실히 숨김
+          b.style.left = '50%'; 
+          b.style.right = 'auto';
+          b.style.transform = 'translateX(-50%)';
+          b.classList.remove('flip-down');
+        }
       });
+    }
 
+    // ✨ 2. 전역 클릭 리스너 (바탕 클릭 시 닫기)
+    // 모바일에서는 'touchstart'와 'click'을 모두 고려해야 할 때가 있습니다.
+    document.addEventListener('click', (e) => {
+      // 클릭한 대상이 맵 노드나 그 안의 자식이 아니라면 모두 닫기
+      if (!e.target.closest('.map-node')) {
+        closeAllBubbles();
+      }
+    });
+
+    // ✨ 3. 몬스터 클릭 시 토글 함수 (개선)
+    function toggleBubble(element, event) {
+      event.stopPropagation(); // 부모(document)로 클릭 이벤트가 전달되는 것을 막음
+      
+      const isActive = element.classList.contains('active');
+      
+      // 일단 다 닫고
+      closeAllBubbles();
+
+      // 만약 방금 누른 게 꺼져있던 거라면 새로 켬
       if(!isActive) {
         element.classList.add('active');
         const bubble = element.querySelector('.speech-bubble');
+        bubble.style.display = 'block'; // 먼저 보여줘야 위치 계산 가능
         
+        // 브라우저가 화면을 그릴 시간을 살짝 줌 (위치 계산용)
         setTimeout(() => {
           const rect = bubble.getBoundingClientRect();
           const mapRect = document.querySelector('.map-container').getBoundingClientRect();
 
-          if (rect.left < mapRect.left + 5) {
-            bubble.style.left = '0'; bubble.style.transform = 'none';
-          } else if (rect.right > mapRect.right - 5) {
-            bubble.style.left = 'auto'; bubble.style.right = '0'; bubble.style.transform = 'none';
+          // 왼쪽 벽에 부딪힘
+          if (rect.left < mapRect.left + 10) {
+            bubble.style.left = '0'; 
+            bubble.style.transform = 'translateX(10%)';
+          } 
+          // 오른쪽 벽에 부딪힘
+          else if (rect.right > mapRect.right - 10) {
+            bubble.style.left = 'auto'; 
+            bubble.style.right = '0'; 
+            bubble.style.transform = 'translateX(-10%)';
           }
           
-          if (rect.top < mapRect.top + 5) {
+          // 위쪽이 가려짐
+          if (rect.top < mapRect.top + 50) {
             bubble.classList.add('flip-down');
           }
-        }, 0);
+        }, 10);
       }
     }
 
