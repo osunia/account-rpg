@@ -351,17 +351,20 @@
       { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" }
     ];
 
-    // ✨ 텍스트 이모지를 MS 3D 이미지 태그로 바꿔주는 똑똑한 변환기! (GAS 수정 방지용)
-    function getEmojiImage(emojiStr, type = "node") {
+function getEmojiImage(emojiStr, type = "node") {
       const found = monsterDic.find(m => m.emoji === emojiStr);
       let imgPath = found ? found.img : null;
-      if (!imgPath && emojiStr === "😺") imgPath = "Grinning%20cat/3D/grinning_cat_3d.png"; // 용사 고양이
+      
+      // ✨ 수정: 100% 실존하는 MS 3D 고양이 경로 (Cat/3D/cat_3d.png)
+      if (!imgPath && emojiStr === "😺") {
+        imgPath = "Cat/3D/cat_3d.png"; 
+      }
       
       if (imgPath) {
         const className = type === "boss" ? "emoji-img boss-card-emoji" : (emojiStr === "😺" ? "emoji-img hero-emoji" : "emoji-img node-emoji");
-        return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}">`;
+        return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}" onerror="this.outerHTML='${emojiStr}'">`;
       }
-      return emojiStr; // 혹시 매칭 안 되면 텍스트 반환
+      return emojiStr; 
     }
 
     function getTodayDateString() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
@@ -404,7 +407,8 @@
 
       // 1. 먼저 SVG 경로(선)와 시작점의 고양이를 그립니다.
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
-      mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">😺</div>`;
+
+mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">${getEmojiImage("😺")}</div>`;
 
       for(let i=1; i < mapCoordinates.length; i++) { 
         pathD += `L ${mapCoordinates[i].x} ${mapCoordinates[i].y} `; 
