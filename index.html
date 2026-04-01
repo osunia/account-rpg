@@ -458,12 +458,15 @@
       // 1. 먼저 SVG 경로(선)와 시작점의 고양이를 그립니다.
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
 
-// ✅ 수정 코드 (고양이와 무기를 함께 넣는 컨테이너 구조로 변경!)
-const catHtml = getEmojiImage("😺");
-// MS 3D 단검 이미지를 가져옵니다. monsterDic에 단검(🗡️)이 이미 있습니다!
-const daggerHtml = getEmojiImage("🗡️", "weapon"); 
+// render 함수 내부의 고양이 그리는 부분 수정
+let catHtml = getEmojiImage("😺");
+let weaponHtml = getEmojiImage("🗡️", "weapon"); // weapon 타입으로 호출
 
-mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">${catHtml}${daggerHtml}</div>`;
+mapNodesContainer.innerHTML += `
+  <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">
+    ${catHtml}
+    ${weaponHtml}
+  </div>`;
       for(let i=1; i < mapCoordinates.length; i++) { 
         pathD += `L ${mapCoordinates[i].x} ${mapCoordinates[i].y} `; 
       }
