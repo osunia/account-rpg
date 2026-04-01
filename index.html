@@ -392,42 +392,55 @@
           <div class="main-boss-dday">${calculateDday(mainBoss.targetDate)}</div>
         </div>`;
 
+      // 1. 먼저 SVG 경로(선)와 시작점의 고양이를 그립니다.
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
-      mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">${getEmojiImage("😺")}</div>`;
-
-      const allBosses = state.bosses;
-      const totalNodes = mapCoordinates.length - 1; 
-      
-      const bossNodes = {};
-      if (allBosses.length > 0) {
-          allBosses.forEach((boss, index) => {
-              let nodeIndex = Math.max(1, Math.round(((index + 1) / allBosses.length) * totalNodes));
-              while(bossNodes[nodeIndex] && nodeIndex > 1) nodeIndex--; 
-              bossNodes[nodeIndex] = boss;
-          });
-      }
+      mapNodesContainer.innerHTML += `<div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">😺</div>`;
 
       for(let i=1; i < mapCoordinates.length; i++) { 
         pathD += `L ${mapCoordinates[i].x} ${mapCoordinates[i].y} `; 
-        if (bossNodes[i]) {
-          const boss = bossNodes[i];
+      }
+      mapPath.setAttribute('d', pathD.trim());
+
+      // ✨ 2. 전체 맵의 실제 길이를 피타고라스 정리로 정밀하게 계산합니다.
+      let segments = [];
+      let totalLength = 0;
+      for (let i = 0; i < mapCoordinates.length - 1; i++) {
+        let p1 = mapCoordinates[i], p2 = mapCoordinates[i+1];
+        let dx = p2.x - p1.x, dy = p2.y - p1.y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+        segments.push({ p1, p2, dist, cumDist: totalLength });
+        totalLength += dist;
+      }
+
+      // ✨ 3. 몬스터 수에 맞춰 전체 길이 기준으로 길 위에 유동적으로 배치합니다.
+      const allBosses = state.bosses;
+      if (allBosses.length > 0) {
+        allBosses.forEach((boss, index) => {
+          // 마지막 보스는 무조건 맵 끝(100%)에 오도록 비율 계산
+          let targetDist = totalLength * ((index + 1) / allBosses.length);
+          
+          // 기본값은 맨 마지막 좌표로 설정 (혹시 모를 오차 방지)
+          let posX = mapCoordinates[mapCoordinates.length - 1].x;
+          let posY = mapCoordinates[mapCoordinates.length - 1].y;
+
+          // 목표 거리가 어느 선분(segment)에 속하는지 찾아 좌표(x, y)를 계산합니다.
+          for (let seg of segments) {
+            if (targetDist >= seg.cumDist && targetDist <= seg.cumDist + seg.dist) {
+              let t = (targetDist - seg.cumDist) / seg.dist; // 해당 선분 내에서의 비율(0~1)
+              posX = seg.p1.x + t * (seg.p2.x - seg.p1.x);
+              posY = seg.p1.y + t * (seg.p2.y - seg.p1.y);
+              break;
+            }
+          }
+
           mapNodesContainer.innerHTML += `
-            <div class="map-node" style="left: ${mapCoordinates[i].x}%; top: ${mapCoordinates[i].y}%;" onclick="toggleBubble(this, event)">
+            <div class="map-node" style="left: ${posX}%; top: ${posY}%;" onclick="toggleBubble(this, event)">
               ${getEmojiImage(boss.emoji)}
               <div class="speech-bubble">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
             </div>`;
-        }
+        });
       }
-      mapPath.setAttribute('d', pathD.trim());
     }
-
-    document.addEventListener('click', () => {
-      document.querySelectorAll('.map-node').forEach(n => {
-        n.classList.remove('active');
-        const b = n.querySelector('.speech-bubble');
-        if(b) { b.style = ''; b.classList.remove('flip-down'); }
-      });
-    });
 
     function toggleBubble(element, event) {
       event.stopPropagation();
