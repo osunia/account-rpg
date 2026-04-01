@@ -13,8 +13,9 @@
       --point-blue: #40a9ff;
       --point-red: #ff4d4f;
       --point-green: #52c41a;
-      --border-thick: 3px solid var(--black);
-      --box-shadow: 4px 4px 0px var(--black);
+      /* ✨ 수정: 테두리 2px로 다이어트, 그림자도 살짝 줄임 */
+      --border-thick: 2px solid var(--black);
+      --box-shadow: 3px 3px 0px var(--black);
     }
     body {
       margin: 0; padding: 0;
@@ -22,12 +23,10 @@
       color: var(--black);
       font-family: 'Pretendard', 'Arial', sans-serif;
       display: flex; justify-content: center;
-      /* ✨ 수정: 모바일 주소창 대응 동적 뷰포트 높이 설정 */
       height: 100dvh; overflow: hidden;
     }
     #app {
       width: 100%; max-width: 450px; 
-      /* ✨ 수정: 모바일 주소창 대응 동적 뷰포트 높이 설정 */
       height: 100dvh;
       display: flex; flex-direction: column; position: relative;
       background-color: var(--bg-color);
@@ -38,26 +37,27 @@
     /* 공통 카툰 스타일 */
     .cartoon-btn {
       background-color: #fff; border: var(--border-thick); font-weight: bold;
-      box-shadow: 3px 3px 0px var(--black); cursor: pointer; transition: all 0.1s; color: var(--black);
+      /* ✨ 수정: 둥근 모서리 추가 */
+      border-radius: 12px;
+      box-shadow: var(--box-shadow); cursor: pointer; transition: all 0.1s; color: var(--black);
     }
     .cartoon-btn:active { transform: translate(3px, 3px); box-shadow: 0px 0px 0px var(--black); }
 
-    /* 상단 헤더 & 게이지 바 */
-    .header { padding: 10px 15px; border-bottom: var(--border-thick); background: #fff; z-index: 10; flex-shrink: 0; }
+    /* 상단 헤더 & 게이지 바 (✨ 폰트/여백 타이트하게 조절) */
+    .header { padding: 8px 12px; border-bottom: var(--border-thick); background: #fff; z-index: 10; flex-shrink: 0; }
     .top-menu { display: flex; justify-content: space-between; margin-bottom: 5px; }
-    .top-menu button { padding: 5px 10px; font-size: 12px; background: #fff; }
-    .mana-title { font-size: 12px; font-weight: bold; text-align: center; color: #555; }
-    .mana-amount { font-size: 28px; font-weight: 900; text-align: center; margin: 0 0 5px 0; letter-spacing: -1px; color: var(--point-blue); text-shadow: 1px 1px 0 #000; }
-    .progress-bg { width: 100%; height: 16px; background-color: #eee; border: 2px solid var(--black); box-shadow: 2px 2px 0 var(--black); border-radius: 8px; overflow: hidden; }
-    .progress-bar { height: 100%; background: var(--point-yellow); width: 0%; transition: width 0.3s; border-right: 2px solid var(--black); }
+    .top-menu button { padding: 4px 8px; font-size: 11px; background: #fff; }
+    .mana-title { font-size: 11px; font-weight: bold; text-align: center; color: #555; }
+    .mana-amount { font-size: 26px; font-weight: 900; text-align: center; margin: 0 0 3px 0; letter-spacing: -1px; color: var(--point-blue); text-shadow: 1px 1px 0 #000; }
+    .progress-bg { width: 100%; height: 14px; background-color: #eee; border: var(--border-thick); box-shadow: 2px 2px 0 var(--black); border-radius: 12px; overflow: hidden; }
+    .progress-bar { height: 100%; background: var(--point-yellow); width: 0%; transition: width 0.3s; border-right: var(--border-thick); }
 
-    /* 메인 보스 */
-    .main-boss-area { padding: 10px 15px; flex-shrink: 0; z-index: 10; background: var(--bg-color); border-bottom: 2px dashed var(--black); }
-    .main-boss-card { padding: 10px 15px; background-color: var(--point-red); color: white; display: flex; justify-content: space-between; align-items: center; border: var(--border-thick); box-shadow: var(--box-shadow); }
-    /* ✨ 수정: 보스 이름(이모지 포함)에 MS 스타일 폰트 우선 적용 */
-    .main-boss-card h3 { margin: 0 0 5px 0; font-size: 18px; font-weight: 900; text-shadow: 2px 2px 0 var(--black); font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; }
-    .main-boss-card p { margin: 0; font-size: 13px; font-weight: bold; }
-    .main-boss-dday { font-size: 20px; font-weight: 900; text-shadow: 2px 2px 0 var(--black); }
+    /* 메인 보스 (✨ 폰트/여백 타이트하게 조절) */
+    .main-boss-area { padding: 8px 12px; flex-shrink: 0; z-index: 10; background: var(--bg-color); border-bottom: 2px dashed var(--black); }
+    .main-boss-card { padding: 8px 12px; background-color: var(--point-red); color: white; display: flex; justify-content: space-between; align-items: center; border: var(--border-thick); box-shadow: var(--box-shadow); border-radius: 12px; }
+    .main-boss-card h3 { margin: 0 0 3px 0; font-size: 16px; font-weight: 900; text-shadow: 1px 1px 0 var(--black); font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; }
+    .main-boss-card p { margin: 0; font-size: 11px; font-weight: bold; }
+    .main-boss-dday { font-size: 18px; font-weight: 900; text-shadow: 1px 1px 0 var(--black); }
 
     /* 구불구불 맵 영역 */
     .map-container {
@@ -67,45 +67,54 @@
     }
     .map-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
     
-    .summon-btn { position: absolute; bottom: 15px; left: 15px; z-index: 20; padding: 8px 12px; font-size: 14px; background: #fff; border: 2px solid var(--black); box-shadow: 3px 3px 0 var(--black); font-weight: bold; cursor: pointer; color: var(--point-blue); }
+    .summon-btn { position: absolute; bottom: 12px; left: 12px; z-index: 20; padding: 6px 10px; font-size: 13px; background: #fff; border: var(--border-thick); box-shadow: var(--box-shadow); border-radius: 12px; font-weight: bold; cursor: pointer; color: var(--point-blue); }
     .summon-btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 var(--black); }
 
-/* ✨ 텍스트 이모지 대신 들어갈 MS 3D 이미지 스타일 */
+    /* ✨ 둥둥 떠다니는 애니메이션 정의 */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+
+    /* 텍스트 이모지 대신 들어갈 MS 3D 이미지 스타일 */
     .emoji-img {
       object-fit: contain;
-      filter: drop-shadow(3px 3px 0px var(--black)); /* 카툰 그림자 완벽 호환! */
+      filter: drop-shadow(2px 2px 0px var(--black));
+      /* ✨ 수정: 숨쉬는 애니메이션 적용 */
+      animation: float 2.5s ease-in-out infinite; 
     }
     .hero-emoji { width: 45px; height: 45px; margin-top: -5px; }
-    .node-emoji { width: 50px; height: 50px; }
-    .boss-card-emoji { width: 24px; height: 24px; vertical-align: middle; margin-right: 5px; filter: drop-shadow(2px 2px 0 var(--black)); }
+    .node-emoji { width: 45px; height: 45px; } /* 살짝 다이어트 */
+    .boss-card-emoji { width: 22px; height: 22px; vertical-align: middle; margin-right: 5px; filter: drop-shadow(1px 1px 0 var(--black)); animation: none; }
     
     /* 몹(노드) 스타일 */
     .map-node {
       position: absolute; margin-left: -20px; margin-top: -20px;
       display: flex; justify-content: center; align-items: center;
-      font-size: 40px; cursor: pointer; z-index: 10;
+      cursor: pointer; z-index: 10;
       transition: transform 0.1s;
-      /* ✨ 수정: 고양이를 포함한 모든 맵 노드에 그림자 적용 & MS 이모지 폰트 적용 */
-      filter: drop-shadow(3px 3px 0px var(--black));
       font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
     }
     
+    /* ✨ 수정: 몬스터들이 각자 다른 타이밍에 숨을 쉬도록 엇박자 추가 */
+    .map-node:nth-child(even) .emoji-img { animation-delay: -0.7s; }
+    .map-node:nth-child(3n) .emoji-img { animation-delay: -1.4s; }
+
     .map-node:active { transform: scale(0.9); }
     .map-node.active { z-index: 50; }
-    .hero-node { font-size: 35px; z-index: 11; }
+    .hero-node { z-index: 11; }
 
     /* 말풍선 */
     .speech-bubble {
       position: absolute; bottom: 80%; left: 50%; transform: translateX(-50%);
-      background: #fff; border: 2px solid var(--black); padding: 5px 10px;
-      /* 말풍선 텍스트는 일반 폰트로 복구 (이모지 폰트 상속 방지) */
+      background: #fff; border: var(--border-thick); padding: 4px 8px; border-radius: 8px;
       font-family: 'Pretendard', 'Arial', sans-serif;
-      font-size: 12px; font-weight: bold; white-space: nowrap; color: var(--black);
+      font-size: 11px; font-weight: bold; white-space: nowrap; color: var(--black);
       box-shadow: 2px 2px 0 var(--black); display: none; z-index: 60; text-align: center;
     }
     .speech-bubble::after { 
-      content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px;
-      border-width: 5px; border-style: solid; border-color: var(--black) transparent transparent transparent;
+      content: ''; position: absolute; top: 100%; left: 50%; margin-left: -4px;
+      border-width: 4px; border-style: solid; border-color: var(--black) transparent transparent transparent;
     }
     .speech-bubble.flip-down {
       bottom: auto; top: 80%;
@@ -113,21 +122,22 @@
     .speech-bubble.flip-down::after {
       top: auto; bottom: 100%; border-color: transparent transparent var(--black) transparent;
     }
-    
     .map-node.active .speech-bubble { display: block; }
 
-    /* 하단 입력 폼 */
+    /* 하단 입력 폼 (✨ 폰트/여백 타이트하게 조절) */
     .input-area {
-      padding: 15px; background: #fff; border-top: var(--border-thick);
-      display: flex; flex-direction: column; gap: 10px; z-index: 20; flex-shrink: 0;
+      padding: 12px; background: #fff; border-top: var(--border-thick);
+      display: flex; flex-direction: column; gap: 8px; z-index: 20; flex-shrink: 0;
+      border-radius: 12px 12px 0 0; /* 위쪽 모서리만 둥글게 */
+      margin-top: -10px; /* 맵과 살짝 겹치게 하여 연결감 부여 */
     }
     .input-area input {
-      padding: 12px; font-size: 16px; font-weight: bold; border: var(--border-thick);
-      box-shadow: inset 2px 2px 0 rgba(0,0,0,0.1); width: 100%; box-sizing: border-box;
+      padding: 10px; font-size: 14px; font-weight: bold; border: var(--border-thick); border-radius: 8px;
+      box-shadow: inset 2px 2px 0 rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;
     }
-    .input-row { display: flex; gap: 10px; }
+    .input-row { display: flex; gap: 8px; }
     #expenseAmount { text-align: right; }
-    .attack-btn { flex: 0 0 100px; background-color: var(--point-red); color: white; font-size: 18px; }
+    .attack-btn { flex: 0 0 90px; background-color: var(--point-red); color: white; font-size: 16px; border-radius: 8px; }
 
     /* 모달 공통 */
     .modal-overlay {
@@ -137,45 +147,45 @@
     }
     .modal-content {
       background: var(--bg-color); width: 100%; max-height: 85vh;
-      border: var(--border-thick); box-shadow: 8px 8px 0 var(--black); padding: 20px;
+      border: var(--border-thick); box-shadow: var(--box-shadow); padding: 15px; border-radius: 16px;
       overflow-y: auto;
     }
-    .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 3px solid var(--black); padding-bottom: 10px; }
-    .modal-header h2 { margin: 0; font-size: 20px; font-weight: 900; }
-    .modal-close { background: none; border: none; font-size: 24px; font-weight: bold; cursor: pointer; color: var(--black); }
+    .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 2px solid var(--black); padding-bottom: 10px; }
+    .modal-header h2 { margin: 0; font-size: 18px; font-weight: 900; }
+    .modal-close { background: none; border: none; font-size: 20px; font-weight: bold; cursor: pointer; color: var(--black); }
     
     /* 폼 그룹 */
-    .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px;}
-    .form-group label { font-size: 14px; font-weight: bold; }
-    .form-group input { padding: 10px; border: 2px solid var(--black); font-weight: bold; font-family: inherit;}
-    .save-btn { width: 100%; padding: 12px; background-color: var(--point-blue); color: white; font-size: 16px; margin-top: 10px; }
+    .form-group { margin-bottom: 12px; display: flex; flex-direction: column; gap: 5px;}
+    .form-group label { font-size: 13px; font-weight: bold; }
+    .form-group input { padding: 8px; border: var(--border-thick); border-radius: 8px; font-weight: bold; font-family: inherit;}
+    .save-btn { width: 100%; padding: 10px; background-color: var(--point-blue); color: white; font-size: 15px; margin-top: 10px; border-radius: 8px; }
 
     /* 로그 & 캘린더 */
-    .log-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-    .tab-btn { flex: 1; padding: 10px; text-align: center; }
+    .log-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tab-btn { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 13px; }
     .tab-btn.active { background: var(--point-yellow); }
     .log-list { list-style: none; padding: 0; margin: 0; border-top: 2px solid var(--black); }
-    .log-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 2px dashed #ccc; font-weight: bold; font-size: 14px; }
-    .cal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 18px; margin-bottom: 10px; }
-    .cal-nav-btn { background: #fff; border: 2px solid var(--black); padding: 5px 10px; font-weight: bold; cursor: pointer; box-shadow: 2px 2px 0 var(--black); }
+    .log-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #ccc; font-weight: bold; font-size: 13px; }
+    .cal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 16px; margin-bottom: 8px; }
+    .cal-nav-btn { background: #fff; border: var(--border-thick); padding: 4px 8px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 2px 2px 0 var(--black); }
     .cal-nav-btn:active { transform: translate(2px,2px); box-shadow: 0 0 0 var(--black); }
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; border: 2px solid var(--black); padding: 4px; background: #fff; }
-    .cal-day-name { text-align: center; font-size: 12px; font-weight: bold; padding: 5px 0; border-bottom: 2px solid var(--black); }
-    .day-cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 1px solid var(--black); position: relative; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; border: var(--border-thick); border-radius: 8px; padding: 4px; background: #fff; }
+    .cal-day-name { text-align: center; font-size: 11px; font-weight: bold; padding: 4px 0; border-bottom: 2px solid var(--black); }
+    .day-cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; border: 1px solid var(--black); border-radius: 4px; position: relative; }
     .day-cell.empty { background: transparent; border: none; }
     .damage-0 { background-color: #fff; } .damage-1 { background-color: #ffccc7; } .damage-2 { background-color: #ff7875; color: white;} .damage-3 { background-color: #f5222d; color: white; } .damage-4 { background-color: #820014; color: white; }
 
     /* 커스텀 알림창 */
     #customAlert { z-index: 9999; }
-    .alert-box { text-align: center; padding: 10px; max-width: 300px; margin: 0 auto; }
-    .alert-msg { font-size: 16px; font-weight: bold; margin-bottom: 20px; word-break: keep-all; line-height: 1.4; }
+    .alert-box { text-align: center; padding: 15px; max-width: 250px; margin: 0 auto; border-radius: 16px; }
+    .alert-msg { font-size: 14px; font-weight: bold; margin-bottom: 15px; word-break: keep-all; line-height: 1.4; }
 
     /* 🔄 로딩 오버레이 */
     #loadingOverlay {
       position: absolute; top:0; left:0; width:100%; height:100%; 
       background:rgba(0,0,0,0.8); z-index:10000; display:none; 
       justify-content:center; align-items:center; color:white; 
-      font-size:20px; font-weight:bold; flex-direction:column;
+      font-size:18px; font-weight:bold; flex-direction:column;
     }
   </style>
 </head>
@@ -202,7 +212,7 @@
     <div class="map-container">
       <button class="summon-btn cartoon-btn" onclick="openModal('summonModal')">➕ 몬스터 소환</button>
       <svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <path id="mapPath" d="" fill="none" stroke="#fae9a5" stroke-width="25" stroke-linecap="square" stroke-linejoin="miter" vector-effect="non-scaling-stroke" />
+        <path id="mapPath" d="" fill="none" stroke="#fae9a5" stroke-width="25" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8, 8" vector-effect="non-scaling-stroke" />
       </svg>
       <div id="mapNodesContainer"></div>
     </div>
@@ -216,7 +226,7 @@
     </div>
 
     <div id="summonModal" class="modal-overlay">
-      <div class="modal-content cartoon-box">
+      <div class="modal-content cartoon-btn" style="cursor: default;">
         <div class="modal-header">
           <h2>😈 몬스터 소환 (일정 추가)</h2>
           <button class="modal-close" onclick="closeModal('summonModal')">×</button>
@@ -238,7 +248,7 @@
     </div>
 
     <div id="settingsModal" class="modal-overlay">
-      <div class="modal-content cartoon-box">
+      <div class="modal-content cartoon-btn" style="cursor: default;">
         <div class="modal-header">
           <h2>⚙️ 왕국 설정</h2>
           <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
@@ -247,7 +257,7 @@
           <label>💰 현재 예산 직접 덮어쓰기</label>
           <input type="number" id="setEditMana">
         </div>
-        <hr style="border: 1px dashed var(--black); margin: 20px 0;">
+        <hr style="border: 1px dashed var(--black); margin: 15px 0;">
         <div class="form-group">
           <label>📅 매월 초기화 날짜</label>
           <input type="number" id="setResetDay" min="1" max="31">
@@ -265,7 +275,7 @@
     </div>
 
     <div id="logModal" class="modal-overlay">
-      <div class="modal-content cartoon-box">
+      <div class="modal-content cartoon-btn" style="cursor: default;">
         <div class="modal-header">
           <h2>📜 전투 기록</h2>
           <button class="modal-close" onclick="closeModal('logModal')">×</button>
@@ -289,9 +299,9 @@
     </div>
 
     <div id="customAlert" class="modal-overlay">
-      <div class="modal-content cartoon-box alert-box">
+      <div class="modal-content cartoon-btn alert-box" style="cursor: default;">
         <div class="alert-msg" id="alertMessage">메시지</div>
-        <button class="cartoon-btn" style="padding: 10px 30px; background: var(--point-yellow);" onclick="closeModal('customAlert')">확인</button>
+        <button class="cartoon-btn" style="padding: 8px 30px; background: var(--point-yellow); border-radius: 8px;" onclick="closeModal('customAlert')">확인</button>
       </div>
     </div>
   </div>
@@ -314,7 +324,7 @@
       { x: 50, y: 50 }, { x: 75, y: 50 }, { x: 75, y: 70 }, { x: 30, y: 70 }, 
       { x: 30, y: 30 }, { x: 10, y: 30 }, { x: 10, y: 90 }, { x: 90, y: 90 }  
     ];
-// ✨ MS 오픈소스 이모지 깃허브 링크 맵핑 (업데이트)
+
     const MS_EMOJI_BASE = "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/";
     
     const monsterDic = [
@@ -332,17 +342,16 @@
       { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" }
     ];
 
-    // ✨ 텍스트 이모지를 MS 3D 이미지 태그로 바꿔주는 똑똑한 변환기! (GAS 수정 방지용)
     function getEmojiImage(emojiStr, type = "node") {
       const found = monsterDic.find(m => m.emoji === emojiStr);
       let imgPath = found ? found.img : null;
-      if (!imgPath && emojiStr === "😺") imgPath = "Grinning%20cat/3D/grinning_cat_3d.png"; // 용사 고양이
+      if (!imgPath && emojiStr === "😺") imgPath = "Grinning%20cat/3D/grinning_cat_3d.png"; 
       
       if (imgPath) {
         const className = type === "boss" ? "emoji-img boss-card-emoji" : (emojiStr === "😺" ? "emoji-img hero-emoji" : "emoji-img node-emoji");
         return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}">`;
       }
-      return emojiStr; // 혹시 매칭 안 되면 텍스트 반환
+      return emojiStr; 
     }
 
     function getTodayDateString() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
