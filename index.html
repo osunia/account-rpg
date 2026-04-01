@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>예산 디펜스 RPG</title>
   <style>
+    /* 🎨 CSS: 카툰/네오브루탈리즘 테마 */
     :root {
       --bg-color: #fdfaf6;
       --black: #111;
@@ -19,7 +20,7 @@
     /* ✨ 모바일 터치 시 발생하는 푸른색 하이라이트 제거 */
     * {
       -webkit-tap-highlight-color: transparent;
-      -webkit-touch-callout: none; /* iOS에서 길게 누를 때 메뉴 뜨는 것 방지 */
+      -webkit-touch-callout: none;
     }
 
     /* ✨ 맵과 몹들을 빠르게 터치할 때 드래그(선택)되는 현상 방지 */
@@ -44,16 +45,13 @@
       box-sizing: border-box;
     }
 
-    /* 공통 카툰 스타일 */
     .cartoon-btn {
       background-color: #fff; border: var(--border-thick); font-weight: bold;
-      /* ✨ 수정: 둥근 모서리 추가 */
       border-radius: 12px;
       box-shadow: var(--box-shadow); cursor: pointer; transition: all 0.1s; color: var(--black);
     }
     .cartoon-btn:active { transform: translate(3px, 3px); box-shadow: 0px 0px 0px var(--black); }
 
-    /* 상단 헤더 & 게이지 바 (✨ 폰트/여백 타이트하게 조절) */
     .header { padding: 8px 12px; border-bottom: var(--border-thick); background: #fff; z-index: 10; flex-shrink: 0; }
     .top-menu { display: flex; justify-content: space-between; margin-bottom: 5px; }
     .top-menu button { padding: 4px 8px; font-size: 11px; background: #fff; }
@@ -62,97 +60,84 @@
     .progress-bg { width: 100%; height: 14px; background-color: #eee; border: var(--border-thick); box-shadow: 2px 2px 0 var(--black); border-radius: 12px; overflow: hidden; }
     .progress-bar { height: 100%; background: var(--point-yellow); width: 0%; transition: width 0.3s; border-right: var(--border-thick); }
 
-    /* 메인 보스 (✨ 폰트/여백 타이트하게 조절) */
     .main-boss-area { padding: 8px 12px; flex-shrink: 0; z-index: 10; background: var(--bg-color); border-bottom: 2px dashed var(--black); }
     .main-boss-card { padding: 8px 12px; background-color: var(--point-red); color: white; display: flex; justify-content: space-between; align-items: center; border: var(--border-thick); box-shadow: var(--box-shadow); border-radius: 12px; }
     .main-boss-card h3 { margin: 0 0 3px 0; font-size: 16px; font-weight: 900; text-shadow: 1px 1px 0 var(--black); font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; }
     .main-boss-card p { margin: 0; font-size: 11px; font-weight: bold; }
     .main-boss-dday { font-size: 18px; font-weight: 900; text-shadow: 1px 1px 0 var(--black); }
 
-/* 맵 컨테이너에 커서 추가 (모바일 클릭 인식 강화) */
-.map-container {
+    .map-container {
       flex: 1; position: relative; background-color: #66ab5e;
       background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px;
       overflow: hidden; 
       cursor: pointer;
-      /* 여기에 추가할 필요 없이 위 1번의 '*' 설정으로 해결됩니다! */
     }
     .map-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
     
     .summon-btn { position: absolute; bottom: 12px; left: 12px; z-index: 20; padding: 6px 10px; font-size: 13px; background: #fff; border: var(--border-thick); box-shadow: var(--box-shadow); border-radius: 12px; font-weight: bold; cursor: pointer; color: var(--point-blue); }
     .summon-btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 var(--black); }
 
-    /* 1️⃣ 애니메이션 정의: 일반 몹용과 용사용 분리 */
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-5px); }
     }
     @keyframes floatHero {
       0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-7px); } /* 용사는 좀 더 역동적으로! */
+      50% { transform: translateY(-7px); }
     }
 
-    /* 2️⃣ 이미지 공통 스타일 (MS 3D 이미지 전용) */
     .emoji-img {
       object-fit: contain;
-      filter: drop-shadow(2px 2px 0px var(--black)); /* 카툰 스타일 그림자 */
+      filter: drop-shadow(2px 2px 0px var(--black)); 
       transition: all 0.1s;
     }
 
-    /* 3️⃣ 용사(고양이+무기) 전용 스타일 */
     .hero-node {
       position: absolute;
-      z-index: 100; /* 몹들보다 무조건 위에 */
+      z-index: 100; 
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-left: -30px; margin-top: -35px; /* 중앙 정렬 오프셋 */
-      animation: floatHero 2s ease-in-out infinite; /* 컨테이너 전체가 둥둥 뜀 */
-      pointer-events: none; /* 고양이가 클릭을 방해하지 않게 */
+      margin-left: -30px; margin-top: -35px; 
+      animation: floatHero 2s ease-in-out infinite; 
+      pointer-events: none; 
     }
 
     .hero-emoji {
       width: 55px; height: 55px;
-      filter: drop-shadow(3px 3px 0px var(--black)); /* 용사 전용 굵은 그림자 */
+      filter: drop-shadow(3px 3px 0px var(--black)); 
     }
 
     .hero-weapon {
-      width: 30px !important; height: 30px !important; /* 크기 살짝 조정 */
+      width: 30px !important; height: 30px !important; 
       position: absolute;
-      right: -15px; bottom: 5px; /* 고양이 손 위치로 미세 조정 */
+      right: -15px; bottom: 5px; 
       z-index: -1;
-      
-      /* ✨ 이미지 뒤집기 강제 적용 */
       transform: scale(-1, -1) rotate(10deg) !important; 
-      
-      /* 뒤집힌 방향에 맞춰 그림자도 반대로 */
       filter: drop-shadow(-2px -2px 0px var(--black)) !important;
-      animation: none !important; /* 무기는 고양이 몸에 붙어서 같이 움직임 */
+      animation: none !important; 
     }
 
-    /* 4️⃣ 몬스터(노드) 공통 스타일 */
     .map-node {
       position: absolute; 
       margin-left: -20px; margin-top: -20px;
       display: flex; justify-content: center; align-items: center;
       cursor: pointer; z-index: 10;
       transition: transform 0.1s;
-      font-size: 40px; /* 텍스트 대비용 */
+      font-size: 40px; 
     }
 
     .node-emoji {
       width: 45px; height: 45px;
-      animation: float 2.5s ease-in-out infinite; /* 몹들만 개별적으로 숨쉼 */
+      animation: float 2.5s ease-in-out infinite; 
     }
 
-    /* 몬스터들이 각자 다른 타이밍에 숨을 쉬도록 엇박자 추가 */
     .map-node:nth-child(even) .node-emoji { animation-delay: -0.7s; }
     .map-node:nth-child(3n) .node-emoji { animation-delay: -1.4s; }
 
     .map-node:active { transform: scale(0.9); }
     .map-node.active { z-index: 50; }
 
-    /* 5️⃣ 기타 UI용 이모지 (기록, 보스카드 등) */
     .boss-card-emoji { 
       width: 22px; height: 22px; 
       vertical-align: middle; 
@@ -160,14 +145,13 @@
       filter: drop-shadow(1px 1px 0 var(--black)); 
     }
 
-    /* 말풍선 기본 스타일 유지 및 트랜지션 추가 */
     .speech-bubble {
       position: absolute; bottom: 85%; left: 50%; transform: translateX(-50%);
       background: #fff; border: var(--border-thick); padding: 5px 10px; border-radius: 8px;
       font-family: 'Pretendard', 'Arial', sans-serif;
       font-size: 11px; font-weight: bold; white-space: nowrap; color: var(--black);
       box-shadow: 2px 2px 0 var(--black); display: none; z-index: 60; text-align: center;
-      pointer-events: none; /* 말풍선 자체는 클릭 방해 안 되게 */
+      pointer-events: none; 
     }
     
     .speech-bubble::after { 
@@ -182,12 +166,11 @@
     }
     .map-node.active .speech-bubble { display: block; }
 
-    /* 하단 입력 폼 (✨ 폰트/여백 타이트하게 조절) */
     .input-area {
       padding: 12px; background: #fff; border-top: var(--border-thick);
       display: flex; flex-direction: column; gap: 8px; z-index: 20; flex-shrink: 0;
-      border-radius: 12px 12px 0 0; /* 위쪽 모서리만 둥글게 */
-      margin-top: -10px; /* 맵과 살짝 겹치게 하여 연결감 부여 */
+      border-radius: 12px 12px 0 0; 
+      margin-top: -10px; 
     }
     .input-area input {
       padding: 10px; font-size: 14px; font-weight: bold; border: var(--border-thick); border-radius: 8px;
@@ -197,7 +180,6 @@
     #expenseAmount { text-align: right; }
     .attack-btn { flex: 0 0 90px; background-color: var(--point-red); color: white; font-size: 16px; border-radius: 8px; }
 
-    /* 모달 공통 */
     .modal-overlay {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0,0,0,0.7); z-index: 900; display: none;
@@ -212,13 +194,11 @@
     .modal-header h2 { margin: 0; font-size: 18px; font-weight: 900; }
     .modal-close { background: none; border: none; font-size: 20px; font-weight: bold; cursor: pointer; color: var(--black); }
     
-    /* 폼 그룹 */
     .form-group { margin-bottom: 12px; display: flex; flex-direction: column; gap: 5px;}
     .form-group label { font-size: 13px; font-weight: bold; }
     .form-group input { padding: 8px; border: var(--border-thick); border-radius: 8px; font-weight: bold; font-family: inherit;}
     .save-btn { width: 100%; padding: 10px; background-color: var(--point-blue); color: white; font-size: 15px; margin-top: 10px; border-radius: 8px; }
 
-    /* 로그 & 캘린더 */
     .log-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
     .tab-btn { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 13px; }
     .tab-btn.active { background: var(--point-yellow); }
@@ -233,12 +213,10 @@
     .day-cell.empty { background: transparent; border: none; }
     .damage-0 { background-color: #fff; } .damage-1 { background-color: #ffccc7; } .damage-2 { background-color: #ff7875; color: white;} .damage-3 { background-color: #f5222d; color: white; } .damage-4 { background-color: #820014; color: white; }
 
-    /* 커스텀 알림창 */
     #customAlert { z-index: 9999; }
     .alert-box { text-align: center; padding: 15px; max-width: 250px; margin: 0 auto; border-radius: 16px; }
     .alert-msg { font-size: 14px; font-weight: bold; margin-bottom: 15px; word-break: keep-all; line-height: 1.4; }
 
-    /* 🔄 로딩 오버레이 */
     #loadingOverlay {
       position: absolute; top:0; left:0; width:100%; height:100%; 
       background:rgba(0,0,0,0.8); z-index:10000; display:none; 
@@ -267,7 +245,7 @@
 
     <div class="main-boss-area" id="mainBossArea"></div>
 
-<div class="map-container">
+    <div class="map-container">
       <button class="summon-btn cartoon-btn" onclick="openModal('summonModal')">소환!</button>
       <svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
         <path id="mapPath" d="" fill="none" stroke="#fae9a5" 
@@ -390,7 +368,7 @@
 
     const MS_EMOJI_BASE = "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/";
     
-const monsterDic = [
+    const monsterDic = [
       { name: "유령", emoji: "👻", img: "Ghost/3D/ghost_3d.png" }, 
       { name: "외계인", emoji: "👾", img: "Alien%20monster/3D/alien_monster_3d.png" }, 
       { name: "로봇", emoji: "🤖", img: "Robot/3D/robot_3d.png" },
@@ -404,7 +382,6 @@ const monsterDic = [
       { name: "골렘", emoji: "🪨", img: "Rock/3D/rock_3d.png" }, 
       { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" },
       { name: "단검", emoji: "🗡️", img: "Dagger/3D/dagger_3d.png" },
-      // ✨ 신규 몬스터 추가!
       { name: "피냐타", emoji: "🪅", img: "Piñata/3D/piñata_3d.png" },
       { name: "타코", emoji: "🌮", img: "Taco/3D/taco_3d.png" },
       { name: "주먹밥", emoji: "🍙", img: "Rice%20ball/3D/rice_ball_3d.png" },
@@ -412,7 +389,7 @@ const monsterDic = [
       { name: "눈사람", emoji: "⛄", img: "Snowman%20without%20snow/3D/snowman_without_snow_3d.png" }
     ];
 
-function getEmojiImage(emojiStr, type = "node") {
+    function getEmojiImage(emojiStr, type = "node") {
       const found = monsterDic.find(m => m.emoji === emojiStr);
       let imgPath = found ? found.img : null;
       
@@ -423,7 +400,7 @@ function getEmojiImage(emojiStr, type = "node") {
       if (imgPath) {
         let className = "emoji-img";
         if (type === "boss") className += " boss-card-emoji";
-        else if (type === "weapon") className += " hero-weapon"; // ✨ 무기 전용 클래스
+        else if (type === "weapon") className += " hero-weapon";
         else if (emojiStr === "😺") className += " hero-emoji";
         else className += " node-emoji monster-emoji";
 
@@ -439,11 +416,16 @@ function getEmojiImage(emojiStr, type = "node") {
     function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
     function showAlert(msg) { document.getElementById('alertMessage').innerHTML = msg; document.getElementById('customAlert').style.display = 'flex'; }
 
+    // ✨ 타임존 이슈를 100% 방어하는 날짜 파싱 헬퍼 함수
+    function parseDateToNoon(dStr) {
+      const p = dStr.split('-');
+      return new Date(p[0], p[1]-1, p[2], 12, 0, 0);
+    }
+
     function render() {
       document.getElementById('manaDisplay').innerText = `${state.currentMana.toLocaleString()} 원`;
       if(!state.bosses) state.bosses = [];
       
-      // 1. 날짜순 정렬
       state.bosses.sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
       
       const mainBossArea = document.getElementById('mainBossArea');
@@ -472,7 +454,6 @@ function getEmojiImage(emojiStr, type = "node") {
           <div class="main-boss-dday">${calculateDday(mainBoss.targetDate)}</div>
         </div>`;
 
-      // 맵 경로 선 및 용사 고양이 그리기
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
       mapNodesContainer.innerHTML += `
         <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">
@@ -485,7 +466,6 @@ function getEmojiImage(emojiStr, type = "node") {
       }
       mapPath.setAttribute('d', pathD.trim());
 
-      // 맵 전체 물리 길이 계산
       let segments = [];
       let totalPathLength = 0;
       for (let i = 0; i < mapCoordinates.length - 1; i++) {
@@ -496,22 +476,21 @@ function getEmojiImage(emojiStr, type = "node") {
         totalPathLength += dist;
       }
 
-      // ✨ [날짜 기반 30일 지평선 배치 로직] ✨
-      const today = new Date(getTodayDateString());
+      // ✨ [날짜 기반 지평선 배치 로직] ✨
+      const todayObj = parseDateToNoon(getTodayDateString());
       const allBosses = state.bosses;
       
-      const HORIZON_DAYS = 30; // 맵의 끝을 30일 뒤로 설정
-      const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.7);
+      const HORIZON_DAYS = 15; // ✨ 지평선을 15일로 줄여서 몬스터들의 매일매일 이동폭을 크게 만듦!
+      const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.5); // ✨ 제곱근을 사용해 1~3일차 간격이 가장 극적으로 보이게 함
 
       allBosses.forEach((boss) => {
-        const target = new Date(boss.targetDate);
-        // 오늘로부터 며칠 뒤인지 계산 (과거면 0.5일로 처리)
-        const diffDays = Math.max(0.5, Math.ceil((target - today) / (1000 * 60 * 60 * 24)));
+        const targetObj = parseDateToNoon(boss.targetDate);
+        const diffDays = Math.max(0.1, Math.round((targetObj - todayObj) / 86400000));
         
-        let scaledDays = Math.pow(diffDays, 0.7);
+        let scaledDays = Math.pow(diffDays, 0.5);
         let ratio = Math.min(1, scaledDays / maxScaledHorizon);
         
-        // 고양이랑 너무 겹치지 않게 전체 길이의 10% 지점부터 100% 지점까지 분배
+        // ✨ 고양이 앞 공간(10%)은 보호하고, 나머지 90% 길에 분배
         let targetDist = totalPathLength * (0.1 + (ratio * 0.9));
         
         let posX = mapCoordinates[mapCoordinates.length - 1].x;
@@ -534,13 +513,12 @@ function getEmojiImage(emojiStr, type = "node") {
       });
     }
 
-    // ✨ 1. 모든 말풍선을 닫는 공용 함수
     function closeAllBubbles() {
       document.querySelectorAll('.map-node').forEach(n => {
         n.classList.remove('active');
         const b = n.querySelector('.speech-bubble');
         if(b) {
-          b.style.display = 'none'; // 확실히 숨김
+          b.style.display = 'none'; 
           b.style.left = '50%'; 
           b.style.right = 'auto';
           b.style.transform = 'translateX(-50%)';
@@ -549,48 +527,37 @@ function getEmojiImage(emojiStr, type = "node") {
       });
     }
 
-    // ✨ 2. 전역 클릭 리스너 (바탕 클릭 시 닫기)
-    // 모바일에서는 'touchstart'와 'click'을 모두 고려해야 할 때가 있습니다.
     document.addEventListener('click', (e) => {
-      // 클릭한 대상이 맵 노드나 그 안의 자식이 아니라면 모두 닫기
       if (!e.target.closest('.map-node')) {
         closeAllBubbles();
       }
     });
 
-    // ✨ 3. 몬스터 클릭 시 토글 함수 (개선)
     function toggleBubble(element, event) {
-      event.stopPropagation(); // 부모(document)로 클릭 이벤트가 전달되는 것을 막음
-      
+      event.stopPropagation(); 
       const isActive = element.classList.contains('active');
       
-      // 일단 다 닫고
       closeAllBubbles();
 
-      // 만약 방금 누른 게 꺼져있던 거라면 새로 켬
       if(!isActive) {
         element.classList.add('active');
         const bubble = element.querySelector('.speech-bubble');
-        bubble.style.display = 'block'; // 먼저 보여줘야 위치 계산 가능
+        bubble.style.display = 'block'; 
         
-        // 브라우저가 화면을 그릴 시간을 살짝 줌 (위치 계산용)
         setTimeout(() => {
           const rect = bubble.getBoundingClientRect();
           const mapRect = document.querySelector('.map-container').getBoundingClientRect();
 
-          // 왼쪽 벽에 부딪힘
           if (rect.left < mapRect.left + 10) {
             bubble.style.left = '0'; 
             bubble.style.transform = 'translateX(10%)';
           } 
-          // 오른쪽 벽에 부딪힘
           else if (rect.right > mapRect.right - 10) {
             bubble.style.left = 'auto'; 
             bubble.style.right = '0'; 
             bubble.style.transform = 'translateX(-10%)';
           }
           
-          // 위쪽이 가려짐
           if (rect.top < mapRect.top + 50) {
             bubble.classList.add('flip-down');
           }
@@ -598,8 +565,11 @@ function getEmojiImage(emojiStr, type = "node") {
       }
     }
 
+    // ✨ 타임존 이슈를 100% 방어하는 D-day 계산 로직
     function calculateDday(dateStr) {
-      const diff = Math.ceil((new Date(dateStr) - new Date(getTodayDateString())) / 86400000);
+      const target = parseDateToNoon(dateStr);
+      const today = parseDateToNoon(getTodayDateString());
+      const diff = Math.round((target - today) / 86400000);
       return diff === 0 ? "D-DAY" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
     }
 
@@ -624,19 +594,13 @@ function getEmojiImage(emojiStr, type = "node") {
 
       if(!state.bosses) state.bosses = [];
 
-      // ✨ [중복 제외 로직 추가] ✨
-      // 1. 현재 맵에 이미 존재하는 몬스터의 이모지 리스트 추출
       const usedEmojis = state.bosses.map(b => b.emoji);
-      
-      // 2. 전체 사전에서 현재 사용 중이지 않은 몬스터만 필터링 (단검🗡️ 제외)
       let availableMonsters = monsterDic.filter(m => !usedEmojis.includes(m.emoji) && m.emoji !== "🗡️");
 
-      // 3. 만약 모든 몬스터가 이미 맵에 다 나와 있다면? 다시 전체 리스트에서 선택
       if (availableMonsters.length === 0) {
         availableMonsters = monsterDic.filter(m => m.emoji !== "🗡️");
       }
 
-      // 4. 필터링된 리스트에서 랜덤 선택
       const randomMonster = availableMonsters[Math.floor(Math.random() * availableMonsters.length)];
       const finalName = `${nameInput} ${randomMonster.name}`; 
 
@@ -731,7 +695,8 @@ function getEmojiImage(emojiStr, type = "node") {
       }
       
       showLoading();
-      fetch(GAS_URL)
+      // ✨ 캐시 무력화 파라미터 적용! 이제 자정 지나고 켜도 최신 마나를 완벽히 가져옵니다.
+      fetch(GAS_URL + "?t=" + new Date().getTime())
         .then(response => response.json())
         .then(serverState => {
           if(serverState) {
@@ -749,6 +714,15 @@ function getEmojiImage(emojiStr, type = "node") {
           render();
         });
     }
+
+    // ✨ 자정이 지나고 폰 화면을 켰을 때, 스스로 새로고침하는 마법!
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        if (state.lastLoginDate && state.lastLoginDate !== getTodayDateString()) {
+          init(); 
+        }
+      }
+    });
 
     init();
   </script>
