@@ -213,10 +213,10 @@
 
     <div class="main-boss-area" id="mainBossArea"></div>
 
-    <div class="map-container">
+<div class="map-container">
       <button class="summon-btn cartoon-btn" onclick="openModal('summonModal')">➕ 몬스터 소환</button>
-<svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <path id="mapPath" d="" fill="none" stroke="#fae9a5" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="0, 40" vector-effect="non-scaling-stroke" />
+      <svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path id="mapPath" d="" fill="none" stroke="#fae9a5" stroke-width="15" stroke-dasharray="20, 15" vector-effect="non-scaling-stroke" />
       </svg>
       <div id="mapNodesContainer"></div>
     </div>
@@ -351,12 +351,13 @@
       const found = monsterDic.find(m => m.emoji === emojiStr);
       let imgPath = found ? found.img : null;
       
-      // ✨ 수정: 주소가 확실한 기본 고양이(Cat face) 3D 이미지로 교체!
-      if (!imgPath && emojiStr === "😺") imgPath = "Cat%20face/3D/cat_face_3d.png"; 
+      // ✨ 수정: 오류 없는 100% 확실한 MS 3D 고양이(Cat) 이미지 경로로 고정!
+      if (!imgPath && emojiStr === "😺") {
+        imgPath = "Cat/3D/cat_3d.png"; 
+      }
       
       if (imgPath) {
         const className = type === "boss" ? "emoji-img boss-card-emoji" : (emojiStr === "😺" ? "emoji-img hero-emoji" : "emoji-img node-emoji");
-        // ✨ 수정: 만약 인터넷 문제 등으로 이미지가 깨지면(onerror), 즉시 원래 텍스트 이모지로 돌아가도록 방어막 추가!
         return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}" onerror="this.outerHTML='${emojiStr}'">`;
       }
       return emojiStr; 
