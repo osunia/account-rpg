@@ -482,21 +482,23 @@
       const todayObj = parseDateToNoon(getTodayDateString());
       const allBosses = state.bosses;
       
-      const HORIZON_DAYS = 30; // 30일 지평선 복구
-      const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.65); // 곡선을 부드럽게 조정
-      const assignedRatios = []; // 겹침 방지용 배열
+      const HORIZON_DAYS = 30; // 30일 지평선
+      // ✨ 수정: 곡선 지수 0.65 -> 0.85 상향! (가까운 날짜일수록 용사 코앞으로 바짝 당겨짐)
+      const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.85); 
+      const assignedRatios = []; 
 
       allBosses.forEach((boss) => {
         const targetObj = parseDateToNoon(boss.targetDate);
+        // D-DAY 이면 0일, 그 외에는 남은 일수
         let diffDays = Math.max(0, Math.round((targetObj - todayObj) / 86400000));
         
-        let scaledDays = Math.pow(diffDays, 0.65);
+        let scaledDays = Math.pow(diffDays, 0.85); // ✨ 수정
         let ratio = Math.min(1, scaledDays / maxScaledHorizon);
         
-        // 💡 겹침 방지 (Anti-clumping): 같은 날짜나 너무 가까우면 살짝 뒤로 밈
+        // 💡 겹침 방지: 같은 날짜나 너무 가까우면 살짝 뒤로 밈 (겹쳐서 안 보이는 현상 방지)
         let conflictCount = assignedRatios.filter(r => Math.abs(r - ratio) < 0.035).length;
         if (conflictCount > 0) {
-          ratio += (conflictCount * 0.035); // 살짝 뒤로 밀어줌
+          ratio += (conflictCount * 0.035);
           if(ratio > 1) ratio = 1;
         }
         assignedRatios.push(ratio);
