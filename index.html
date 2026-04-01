@@ -393,8 +393,13 @@ const monsterDic = [
       { name: "마왕", emoji: "👑", img: "Crown/3D/crown_3d.png" }, 
       { name: "골렘", emoji: "🪨", img: "Rock/3D/rock_3d.png" }, 
       { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" },
-      // ✨ 단검 이미지 경로 추가!
-      { name: "단검", emoji: "🗡️", img: "Dagger/3D/dagger_3d.png" }
+      { name: "단검", emoji: "🗡️", img: "Dagger/3D/dagger_3d.png" },
+      // ✨ 신규 몬스터 추가!
+      { name: "피냐타", emoji: "🪅", img: "Piñata/3D/piñata_3d.png" },
+      { name: "타코", emoji: "🌮", img: "Taco/3D/taco_3d.png" },
+      { name: "주먹밥", emoji: "🍙", img: "Rice%20ball/3D/rice_ball_3d.png" },
+      { name: "선인장", emoji: "🌵", img: "Cactus/3D/cactus_3d.png" },
+      { name: "눈사람", emoji: "⛄", img: "Snowman%20without%20snow/3D/snowman_without_snow_3d.png" }
     ];
 
 function getEmojiImage(emojiStr, type = "node") {
@@ -601,10 +606,24 @@ mapNodesContainer.innerHTML += `
       const dateInput = document.getElementById('newBossDate').value;
       if (!nameInput || isNaN(hpInput) || hpInput <= 0 || !dateInput) { showAlert("정보를 정확히 입력해주세요! 🐛"); return; }
 
-      const randomMonster = monsterDic[Math.floor(Math.random() * monsterDic.length)];
+      if(!state.bosses) state.bosses = [];
+
+      // ✨ [중복 제외 로직 추가] ✨
+      // 1. 현재 맵에 이미 존재하는 몬스터의 이모지 리스트 추출
+      const usedEmojis = state.bosses.map(b => b.emoji);
+      
+      // 2. 전체 사전에서 현재 사용 중이지 않은 몬스터만 필터링 (단검🗡️ 제외)
+      let availableMonsters = monsterDic.filter(m => !usedEmojis.includes(m.emoji) && m.emoji !== "🗡️");
+
+      // 3. 만약 모든 몬스터가 이미 맵에 다 나와 있다면? 다시 전체 리스트에서 선택
+      if (availableMonsters.length === 0) {
+        availableMonsters = monsterDic.filter(m => m.emoji !== "🗡️");
+      }
+
+      // 4. 필터링된 리스트에서 랜덤 선택
+      const randomMonster = availableMonsters[Math.floor(Math.random() * availableMonsters.length)];
       const finalName = `${nameInput} ${randomMonster.name}`; 
 
-      if(!state.bosses) state.bosses = [];
       state.bosses.push({ id: Date.now(), name: finalName, hp: hpInput, targetDate: dateInput, emoji: randomMonster.emoji });
       
       document.getElementById('newBossName').value = ''; document.getElementById('newBossHp').value = ''; document.getElementById('newBossDate').value = '';
