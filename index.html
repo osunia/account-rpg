@@ -106,18 +106,18 @@
       filter: drop-shadow(3px 3px 0px var(--black)); /* 용사 전용 굵은 그림자 */
     }
 
-    /* ✨ 무기 이미지 뒤집기 핵심 스타일 */
     .hero-weapon {
-      width: 35px; height: 35px;
+      width: 30px !important; height: 30px !important; /* 크기 살짝 조정 */
       position: absolute;
-      right: -12px; bottom: 0px; /* 고양이 손 근처 위치 */
-      z-index: -1; /* 고양이 몸통 뒤로 살짝 겹치게 */
+      right: -15px; bottom: 5px; /* 고양이 손 위치로 미세 조정 */
+      z-index: -1;
       
-      /* 💡 좌우(-1) & 상하(-1) 뒤집기 마법! */
-      transform: scale(-1, -1); 
+      /* ✨ 이미지 뒤집기 강제 적용 */
+      transform: scale(-1, -1) rotate(10deg) !important; 
       
-      /* 뒤집혔으므로 그림자 방향도 미세하게 조정 */
-      filter: drop-shadow(-2px -2px 0px var(--black)); 
+      /* 뒤집힌 방향에 맞춰 그림자도 반대로 */
+      filter: drop-shadow(-2px -2px 0px var(--black)) !important;
+      animation: none !important; /* 무기는 고양이 몸에 붙어서 같이 움직임 */
     }
 
     /* 4️⃣ 몬스터(노드) 공통 스타일 */
@@ -380,7 +380,7 @@
 
     const MS_EMOJI_BASE = "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/";
     
-    const monsterDic = [
+const monsterDic = [
       { name: "유령", emoji: "👻", img: "Ghost/3D/ghost_3d.png" }, 
       { name: "외계인", emoji: "👾", img: "Alien%20monster/3D/alien_monster_3d.png" }, 
       { name: "로봇", emoji: "🤖", img: "Robot/3D/robot_3d.png" },
@@ -392,11 +392,12 @@
       { name: "잭오랜턴", emoji: "🎃", img: "Jack-o-lantern/3D/jack-o-lantern_3d.png" }, 
       { name: "마왕", emoji: "👑", img: "Crown/3D/crown_3d.png" }, 
       { name: "골렘", emoji: "🪨", img: "Rock/3D/rock_3d.png" }, 
-      { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" }
+      { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" },
+      // ✨ 단검 이미지 경로 추가!
+      { name: "단검", emoji: "🗡️", img: "Dagger/3D/dagger_3d.png" }
     ];
 
-// ✨ 텍스트 이모지를 MS 3D 이미지 태그로 바꿔주는 똑똑한 변환기!
-    function getEmojiImage(emojiStr, type = "node") {
+function getEmojiImage(emojiStr, type = "node") {
       const found = monsterDic.find(m => m.emoji === emojiStr);
       let imgPath = found ? found.img : null;
       
@@ -405,12 +406,11 @@
       }
       
       if (imgPath) {
-        let className = "";
-        // ✨ 클래스 부여 로직 정리
-        if (type === "boss") className = "emoji-img boss-card-emoji";
-        else if (type === "weapon") className = "emoji-img hero-weapon"; // ✨ 무기용 클래스 추가
-        else if (emojiStr === "😺") className = "emoji-img hero-emoji";
-        else className = "emoji-img node-emoji monster-emoji"; // ✨ 몹들에게만 monster-emoji 클래스 추가
+        let className = "emoji-img";
+        if (type === "boss") className += " boss-card-emoji";
+        else if (type === "weapon") className += " hero-weapon"; // ✨ 무기 전용 클래스
+        else if (emojiStr === "😺") className += " hero-emoji";
+        else className += " node-emoji monster-emoji";
 
         return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}" onerror="this.outerHTML='${emojiStr}'">`;
       }
