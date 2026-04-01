@@ -22,10 +22,13 @@
       color: var(--black);
       font-family: 'Pretendard', 'Arial', sans-serif;
       display: flex; justify-content: center;
-      height: 100vh; overflow: hidden;
+      /* ✨ 수정: 모바일 주소창 대응 동적 뷰포트 높이 설정 */
+      height: 100dvh; overflow: hidden;
     }
     #app {
-      width: 100%; max-width: 450px; height: 100vh;
+      width: 100%; max-width: 450px; 
+      /* ✨ 수정: 모바일 주소창 대응 동적 뷰포트 높이 설정 */
+      height: 100dvh;
       display: flex; flex-direction: column; position: relative;
       background-color: var(--bg-color);
       border-left: var(--border-thick); border-right: var(--border-thick);
@@ -51,7 +54,8 @@
     /* 메인 보스 */
     .main-boss-area { padding: 10px 15px; flex-shrink: 0; z-index: 10; background: var(--bg-color); border-bottom: 2px dashed var(--black); }
     .main-boss-card { padding: 10px 15px; background-color: var(--point-red); color: white; display: flex; justify-content: space-between; align-items: center; border: var(--border-thick); box-shadow: var(--box-shadow); }
-    .main-boss-card h3 { margin: 0 0 5px 0; font-size: 18px; font-weight: 900; text-shadow: 2px 2px 0 var(--black); }
+    /* ✨ 수정: 보스 이름(이모지 포함)에 MS 스타일 폰트 우선 적용 */
+    .main-boss-card h3 { margin: 0 0 5px 0; font-size: 18px; font-weight: 900; text-shadow: 2px 2px 0 var(--black); font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; }
     .main-boss-card p { margin: 0; font-size: 13px; font-weight: bold; }
     .main-boss-dday { font-size: 20px; font-weight: 900; text-shadow: 2px 2px 0 var(--black); }
 
@@ -72,10 +76,9 @@
       display: flex; justify-content: center; align-items: center;
       font-size: 40px; cursor: pointer; z-index: 10;
       transition: transform 0.1s;
-    }
-    /* ✨ 추가된 부분: 이모지에 카툰 스타일 그림자 적용 */
-    .map-node:not(.hero-node) {
+      /* ✨ 수정: 고양이를 포함한 모든 맵 노드에 그림자 적용 & MS 이모지 폰트 적용 */
       filter: drop-shadow(3px 3px 0px var(--black));
+      font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
     }
     
     .map-node:active { transform: scale(0.9); }
@@ -86,6 +89,8 @@
     .speech-bubble {
       position: absolute; bottom: 80%; left: 50%; transform: translateX(-50%);
       background: #fff; border: 2px solid var(--black); padding: 5px 10px;
+      /* 말풍선 텍스트는 일반 폰트로 복구 (이모지 폰트 상속 방지) */
+      font-family: 'Pretendard', 'Arial', sans-serif;
       font-size: 12px; font-weight: bold; white-space: nowrap; color: var(--black);
       box-shadow: 2px 2px 0 var(--black); display: none; z-index: 60; text-align: center;
     }
@@ -93,7 +98,6 @@
       content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px;
       border-width: 5px; border-style: solid; border-color: var(--black) transparent transparent transparent;
     }
-    /* ✨ 추가된 부분: 위쪽이 가려질 경우 말풍선이 아래로 향하게 함 */
     .speech-bubble.flip-down {
       bottom: auto; top: 80%;
     }
@@ -316,8 +320,6 @@
     function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
     function showAlert(msg) { document.getElementById('alertMessage').innerHTML = msg; document.getElementById('customAlert').style.display = 'flex'; }
 
-    // 🐛 버그 원인이었던 클라이언트 측 calculateMana() 함수는 삭제했습니다!
-
     function render() {
       document.getElementById('manaDisplay').innerText = `${state.currentMana.toLocaleString()} 원`;
       if(!state.bosses) state.bosses = [];
@@ -476,7 +478,6 @@
     }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    // ✨ 설정 저장 시에도 클라이언트의 계산을 없애고 그대로 저장합니다.
     function saveSettings() {
       const newMana = parseInt(document.getElementById('setEditMana').value);
       if(!isNaN(newMana)) state.currentMana = newMana;
@@ -488,7 +489,6 @@
       showAlert("설정 저장 완료! ✨");
     }
 
-    // 기록 및 캘린더 로직 유지
     function switchLogTab(tab) {
       document.getElementById('tabList').classList.toggle('active', tab === 'list');
       document.getElementById('tabGrid').classList.toggle('active', tab === 'grid');
@@ -526,7 +526,6 @@
       }
     }
 
-    // ✨ 서버 통신 함수 개편: 백엔드가 계산해준 데이터를 그대로 받아오기만 합니다.
     function init() {
       if(!GAS_URL || GAS_URL.includes("여기에_고객님의_GAS_URL")) {
         showAlert("GAS URL이 설정되지 않았습니다! 코드에 URL을 넣어주세요.");
@@ -539,7 +538,6 @@
         .then(serverState => {
           if(serverState) {
             state = serverState;
-            // 백엔드가 마나 충전 후 남긴 메시지가 있다면 알림 띄우기
             if (state.syncMessages && state.syncMessages.length > 0) {
               showAlert(state.syncMessages.join("<br>"));
             }
