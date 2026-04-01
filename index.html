@@ -462,11 +462,12 @@ function getEmojiImage(emojiStr, type = "node") {
           <div class="main-boss-dday">${calculateDday(mainBoss.targetDate)}</div>
         </div>`;
 
-      // 맵 경로 선 그리기
+      // 맵 경로 선 및 용사 고양이 그리기
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
       mapNodesContainer.innerHTML += `
-        <div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">
-          ${getEmojiImage("😺")}${getEmojiImage("🗡️", "weapon")}
+        <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">
+          ${getEmojiImage("😺")}
+          ${getEmojiImage("🗡️", "weapon")}
         </div>`;
 
       for(let i=1; i < mapCoordinates.length; i++) { 
@@ -485,27 +486,22 @@ function getEmojiImage(emojiStr, type = "node") {
         totalPathLength += dist;
       }
 
-// ✨ [수정된 날짜 기반 배치 로직] ✨
+      // ✨ [날짜 기반 30일 지평선 배치 로직] ✨
       const today = new Date(getTodayDateString());
       const allBosses = state.bosses;
       
-      // 💡 지평선 설정: 맵의 끝(100%)을 '오늘로부터 몇 일 뒤'로 볼 것인가?
-      // 보통 한 달(30일) 정도로 잡으면 무난합니다.
-      const HORIZON_DAYS = 30; 
+      const HORIZON_DAYS = 30; // 맵의 끝을 30일 뒤로 설정
       const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.7);
 
-      bossDateData.forEach((boss) => {
+      allBosses.forEach((boss) => {
         const target = new Date(boss.targetDate);
+        // 오늘로부터 며칠 뒤인지 계산 (과거면 0.5일로 처리)
         const diffDays = Math.max(0.5, Math.ceil((target - today) / (1000 * 60 * 60 * 24)));
         
-        // 날짜 압축 계산
         let scaledDays = Math.pow(diffDays, 0.7);
-        
-        // 💡 계산 핵심: 마지막 몹 기준이 아니라 HORIZON_DAYS 기준으로 비율 계산
-        // 만약 일정이 30일보다 멀리 있다면 100% 지점(끝)에 겹쳐서 표시됩니다.
         let ratio = Math.min(1, scaledDays / maxScaledHorizon);
         
-        // 보너스: 몹이 너무 고양이랑 겹치지 않게 최소 시작 지점을 10%로 설정
+        // 고양이랑 너무 겹치지 않게 전체 길이의 10% 지점부터 100% 지점까지 분배
         let targetDist = totalPathLength * (0.1 + (ratio * 0.9));
         
         let posX = mapCoordinates[mapCoordinates.length - 1].x;
