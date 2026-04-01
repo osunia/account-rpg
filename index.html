@@ -348,7 +348,7 @@
   </div>
 
   <script>
-    /* 💡 JS 로직: Git + GAS 분리형 API 연동 */
+/* 💡 JS 로직: Git + GAS 분리형 API 연동 (Local-First 방식) */
 
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzEq8GmgpYUbqcgPmigVcgoCFcdqEPY_NaDjYe08wkUU1yPn1iRyQoEat2_FTMqtRNm/exec";
 
@@ -400,7 +400,7 @@
       if (imgPath) {
         let className = "emoji-img";
         if (type === "boss") className += " boss-card-emoji";
-        else if (type === "weapon") className += " hero-weapon";
+        else if (type === "weapon") className += " hero-weapon"; 
         else if (emojiStr === "😺") className += " hero-emoji";
         else className += " node-emoji monster-emoji";
 
@@ -416,9 +416,12 @@
     function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
     function showAlert(msg) { document.getElementById('alertMessage').innerHTML = msg; document.getElementById('customAlert').style.display = 'flex'; }
 
-    // ✨ 타임존 이슈를 100% 방어하는 날짜 파싱 헬퍼 함수
+    // ✨ 타임존 및 ISO 문자열 버그를 100% 차단하는 파싱 함수로 업그레이드!
     function parseDateToNoon(dStr) {
-      const p = dStr.split('-');
+      if (!dStr) return new Date();
+      // 긴 타임스탬프(2026-04-05T15:00:00Z)가 와도 앞 10자리(YYYY-MM-DD)만 확실하게 자릅니다.
+      const cleanDate = String(dStr).substring(0, 10);
+      const p = cleanDate.split('-');
       return new Date(p[0], p[1]-1, p[2], 12, 0, 0);
     }
 
@@ -476,12 +479,11 @@
         totalPathLength += dist;
       }
 
-      // ✨ [날짜 기반 지평선 배치 로직] ✨
       const todayObj = parseDateToNoon(getTodayDateString());
       const allBosses = state.bosses;
       
-      const HORIZON_DAYS = 15; // ✨ 지평선을 15일로 줄여서 몬스터들의 매일매일 이동폭을 크게 만듦!
-      const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.5); // ✨ 제곱근을 사용해 1~3일차 간격이 가장 극적으로 보이게 함
+      const HORIZON_DAYS = 15; 
+      const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.5);
 
       allBosses.forEach((boss) => {
         const targetObj = parseDateToNoon(boss.targetDate);
@@ -490,7 +492,6 @@
         let scaledDays = Math.pow(diffDays, 0.5);
         let ratio = Math.min(1, scaledDays / maxScaledHorizon);
         
-        // ✨ 고양이 앞 공간(10%)은 보호하고, 나머지 90% 길에 분배
         let targetDist = totalPathLength * (0.1 + (ratio * 0.9));
         
         let posX = mapCoordinates[mapCoordinates.length - 1].x;
@@ -565,7 +566,6 @@
       }
     }
 
-    // ✨ 타임존 이슈를 100% 방어하는 D-day 계산 로직
     function calculateDday(dateStr) {
       const target = parseDateToNoon(dateStr);
       const today = parseDateToNoon(getTodayDateString());
@@ -573,8 +573,10 @@
       return diff === 0 ? "D-DAY" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
     }
 
+    // ✨ 화면을 답답하게 가리던 로딩창을 제거하고, 즉시 화면 반영 후 백그라운드 서버 저장 진행
     function saveState() {
-      showLoading();
+      localStorage.setItem('rpg_defense_state', JSON.stringify(state)); // 로컬 최신화
+
       fetch(GAS_URL, {
         method: 'POST',
         redirect: 'follow', 
@@ -582,8 +584,8 @@
         body: JSON.stringify(state)
       })
       .then(response => response.json())
-      .then(result => { hideLoading(); })
-      .catch(err => { hideLoading(); showAlert("데이터 저장 실패! 인터넷 연결을 확인하세요. 🐛"); });
+      .then(result => { /* 백그라운드 조용히 성공 */ })
+      .catch(err => { showAlert("서버 데이터 저장 실패! 인터넷 연결을 확인하세요. 🐛"); });
     }
 
     function addBoss() {
@@ -688,43 +690,63 @@
       }
     }
 
+    // ✨ 서버 데이터 요청 & 로컬-퍼스트 렌더링 로직
     function init() {
       if(!GAS_URL || GAS_URL.includes("여기에_고객님의_GAS_URL")) {
         showAlert("GAS URL이 설정되지 않았습니다! 코드에 URL을 넣어주세요.");
         render(); return;
       }
       
-      showLoading();
-      // ✨ 캐시 무력화 파라미터 적용! 이제 자정 지나고 켜도 최신 마나를 완벽히 가져옵니다.
+      // 1. 브라우저 저장소(캐시)에서 가장 최근 데이터를 꺼내서 즉시 보여줍니다! (로딩 0초)
+      const localData = localStorage.getItem('rpg_defense_state');
+      let hasLocalData = false;
+      if (localData) {
+        state = JSON.parse(localData);
+        hasLocalData = true;
+        render(); 
+      }
+      
+      // 로컬 데이터가 아예 없는 처음 켤 때만 까만 로딩창을 보여줍니다.
+      if (!hasLocalData) showLoading(); 
+
+      // 2. 백그라운드에서 조용히 서버 최신 상태를 확인합니다.
       fetch(GAS_URL + "?t=" + new Date().getTime())
         .then(response => response.json())
         .then(serverState => {
           if(serverState) {
+            // 가져온 데이터가 화면에 있는 것과 다르면 화면을 갱신합니다.
+            const prevStateStr = JSON.stringify(state);
             state = serverState;
+            localStorage.setItem('rpg_defense_state', JSON.stringify(state)); 
+            
             if (state.syncMessages && state.syncMessages.length > 0) {
               showAlert(state.syncMessages.join("<br>"));
             }
+            
+            if (prevStateStr !== JSON.stringify(state) || !hasLocalData) {
+              render(); 
+            }
           }
-          render(); 
-          hideLoading();
+          if (!hasLocalData) hideLoading();
         })
         .catch(err => {
-          hideLoading();
-          showAlert("서버 통신 실패! 이전 데이터로 접속됩니다. 🐛");
-          render();
+          if (!hasLocalData) {
+            hideLoading();
+            showAlert("서버 통신 실패! 로컬 데이터로 접속됩니다. 🐛");
+            render();
+          }
         });
     }
 
-    // ✨ 자정이 지나고 폰 화면을 켰을 때, 스스로 새로고침하는 마법!
+    // 폰 화면 켰을 때(탭 전환 등) 백그라운드 조용히 새로고침 (로딩창 안 뜸!)
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
-        if (state.lastLoginDate && state.lastLoginDate !== getTodayDateString()) {
-          init(); 
-        }
+        init(); 
       }
     });
 
     init();
+  </script>
   </script>
 </body>
 </html>
