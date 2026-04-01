@@ -432,6 +432,8 @@ function getEmojiImage(emojiStr, type = "node") {
     function render() {
       document.getElementById('manaDisplay').innerText = `${state.currentMana.toLocaleString()} 원`;
       if(!state.bosses) state.bosses = [];
+      
+      // 1. 날짜순 정렬
       state.bosses.sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
       
       const mainBossArea = document.getElementById('mainBossArea');
@@ -460,62 +462,70 @@ function getEmojiImage(emojiStr, type = "node") {
           <div class="main-boss-dday">${calculateDday(mainBoss.targetDate)}</div>
         </div>`;
 
-      // 1. 먼저 SVG 경로(선)와 시작점의 고양이를 그립니다.
+      // 맵 경로 선 그리기
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
+      mapNodesContainer.innerHTML += `
+        <div class="map-node hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">
+          ${getEmojiImage("😺")}${getEmojiImage("🗡️", "weapon")}
+        </div>`;
 
-// render 함수 내부의 고양이 그리는 부분 수정
-let catHtml = getEmojiImage("😺");
-let weaponHtml = getEmojiImage("🗡️", "weapon"); // weapon 타입으로 호출
-
-mapNodesContainer.innerHTML += `
-  <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">
-    ${catHtml}
-    ${weaponHtml}
-  </div>`;
       for(let i=1; i < mapCoordinates.length; i++) { 
         pathD += `L ${mapCoordinates[i].x} ${mapCoordinates[i].y} `; 
       }
       mapPath.setAttribute('d', pathD.trim());
 
-      // ✨ 2. 전체 맵의 실제 길이를 피타고라스 정리로 정밀하게 계산합니다.
+      // 맵 전체 물리 길이 계산
       let segments = [];
-      let totalLength = 0;
+      let totalPathLength = 0;
       for (let i = 0; i < mapCoordinates.length - 1; i++) {
         let p1 = mapCoordinates[i], p2 = mapCoordinates[i+1];
         let dx = p2.x - p1.x, dy = p2.y - p1.y;
         let dist = Math.sqrt(dx * dx + dy * dy);
-        segments.push({ p1, p2, dist, cumDist: totalLength });
-        totalLength += dist;
+        segments.push({ p1, p2, dist, cumDist: totalPathLength });
+        totalPathLength += dist;
       }
 
-      // ✨ 3. 몬스터 수에 맞춰 전체 길이 기준으로 길 위에 유동적으로 배치합니다.
+// ✨ [수정된 날짜 기반 배치 로직] ✨
+      const today = new Date(getTodayDateString());
       const allBosses = state.bosses;
-      if (allBosses.length > 0) {
-        allBosses.forEach((boss, index) => {
-          // 마지막 보스는 무조건 맵 끝(100%)에 오도록 비율 계산
-          let targetDist = totalLength * ((index + 1) / allBosses.length);
-          
-          // 기본값은 맨 마지막 좌표로 설정 (혹시 모를 오차 방지)
-          let posX = mapCoordinates[mapCoordinates.length - 1].x;
-          let posY = mapCoordinates[mapCoordinates.length - 1].y;
+      
+      // 💡 지평선 설정: 맵의 끝(100%)을 '오늘로부터 몇 일 뒤'로 볼 것인가?
+      // 보통 한 달(30일) 정도로 잡으면 무난합니다.
+      const HORIZON_DAYS = 30; 
+      const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.7);
 
-          // 목표 거리가 어느 선분(segment)에 속하는지 찾아 좌표(x, y)를 계산합니다.
-          for (let seg of segments) {
-            if (targetDist >= seg.cumDist && targetDist <= seg.cumDist + seg.dist) {
-              let t = (targetDist - seg.cumDist) / seg.dist; // 해당 선분 내에서의 비율(0~1)
-              posX = seg.p1.x + t * (seg.p2.x - seg.p1.x);
-              posY = seg.p1.y + t * (seg.p2.y - seg.p1.y);
-              break;
-            }
+      bossDateData.forEach((boss) => {
+        const target = new Date(boss.targetDate);
+        const diffDays = Math.max(0.5, Math.ceil((target - today) / (1000 * 60 * 60 * 24)));
+        
+        // 날짜 압축 계산
+        let scaledDays = Math.pow(diffDays, 0.7);
+        
+        // 💡 계산 핵심: 마지막 몹 기준이 아니라 HORIZON_DAYS 기준으로 비율 계산
+        // 만약 일정이 30일보다 멀리 있다면 100% 지점(끝)에 겹쳐서 표시됩니다.
+        let ratio = Math.min(1, scaledDays / maxScaledHorizon);
+        
+        // 보너스: 몹이 너무 고양이랑 겹치지 않게 최소 시작 지점을 10%로 설정
+        let targetDist = totalPathLength * (0.1 + (ratio * 0.9));
+        
+        let posX = mapCoordinates[mapCoordinates.length - 1].x;
+        let posY = mapCoordinates[mapCoordinates.length - 1].y;
+
+        for (let seg of segments) {
+          if (targetDist >= seg.cumDist && targetDist <= seg.cumDist + seg.dist) {
+            let t = (targetDist - seg.cumDist) / seg.dist;
+            posX = seg.p1.x + t * (seg.p2.x - seg.p1.x);
+            posY = seg.p1.y + t * (seg.p2.y - seg.p1.y);
+            break;
           }
+        }
 
-          mapNodesContainer.innerHTML += `
-            <div class="map-node" style="left: ${posX}%; top: ${posY}%;" onclick="toggleBubble(this, event)">
-              ${getEmojiImage(boss.emoji)}
-              <div class="speech-bubble">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
-            </div>`;
-        });
-      }
+        mapNodesContainer.innerHTML += `
+          <div class="map-node" style="left: ${posX}%; top: ${posY}%;" onclick="toggleBubble(this, event)">
+            <div class="node-emoji">${getEmojiImage(boss.emoji)}</div>
+            <div class="speech-bubble">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
+          </div>`;
+      });
     }
 
     // ✨ 1. 모든 말풍선을 닫는 공용 함수
