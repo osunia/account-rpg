@@ -517,11 +517,30 @@ const monsterDic = [
     function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
     function showAlert(msg) { document.getElementById('alertMessage').innerHTML = msg; document.getElementById('customAlert').style.display = 'flex'; }
 
+// ✨ 1. 어떤 날짜 형식이든 YYYY-MM-DD 로 예쁘게 바꿔주는 마법 함수
+    function formatDateString(dStr) {
+      if (!dStr) return "";
+      const d = new Date(dStr);
+      if (!isNaN(d.getTime())) {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      }
+      // 구글 스프레드시트의 요상한 포맷까지 대비한 강력한 추출
+      const match = String(dStr).match(/(\d{4})[^\d]+(\d{1,2})[^\d]+(\d{1,2})/);
+      if (match) return `${match[1]}-${String(match[2]).padStart(2,'0')}-${String(match[3]).padStart(2,'0')}`;
+      return String(dStr).substring(0, 10);
+    }
+
+    // ✨ 2. D-DAY 계산이 절대 꼬이지 않게 '정오'를 정확히 계산하는 방패 함수
     function parseDateToNoon(dStr) {
       if (!dStr) return new Date();
-      const cleanDate = String(dStr).substring(0, 10);
-      const p = cleanDate.split('-');
-      return new Date(p[0], p[1]-1, p[2], 12, 0, 0);
+      const d = new Date(dStr);
+      if (!isNaN(d.getTime())) {
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
+      }
+      // 실패 시 정규식 추출 시도
+      const match = String(dStr).match(/(\d{4})[^\d]+(\d{1,2})[^\d]+(\d{1,2})/);
+      if (match) return new Date(match[1], match[2]-1, match[3], 12, 0, 0);
+      return new Date();
     }
 
     function extractEventName(fullName, emoji) {
@@ -540,7 +559,8 @@ const monsterDic = [
     function render() {
       document.getElementById('manaDisplay').innerText = `${state.currentMana.toLocaleString()} 원`;
       if(!state.bosses) state.bosses = [];
-      state.bosses.sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
+// ✨ 3. 정렬할 때도 완벽하게 날짜를 인식하도록 교체!
+      state.bosses.sort((a, b) => parseDateToNoon(a.targetDate) - parseDateToNoon(b.targetDate));
       
       const mainBossArea = document.getElementById('mainBossArea');
       const mapNodesContainer = document.getElementById('mapNodesContainer');
@@ -557,8 +577,9 @@ const monsterDic = [
       let percent = (state.currentMana / mainBoss.hp) * 100;
       document.getElementById('manaBar').style.width = `${Math.min(percent, 100)}%`;
 
-      let listHtml = state.bosses.map(b => {
-        const cleanDate = String(b.targetDate).substring(0, 10);
+let listHtml = state.bosses.map(b => {
+        // ✨ 4. 무식한 절단기 대신 예쁜 포맷 필터 적용!
+        const cleanDate = formatDateString(b.targetDate);
         return `
         <div class="boss-list-item">
           <div class="boss-info-col" onclick="openEditModal(${b.id})">
@@ -827,7 +848,8 @@ const monsterDic = [
       document.getElementById('editBossId').value = boss.id;
       document.getElementById('editBossName').value = extractEventName(boss.name, boss.emoji);
       document.getElementById('editBossHp').value = boss.hp;
-      document.getElementById('editBossDate').value = String(boss.targetDate).substring(0, 10);
+// ✨ 5. 수정창 열릴 때도 안전하게 날짜 형식 통일!
+      document.getElementById('editBossDate').value = formatDateString(boss.targetDate);
       
       openModal('editBossModal');
     }
