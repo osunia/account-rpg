@@ -511,6 +511,14 @@ const monsterDic = [
       return emojiStr; 
     }
 
+// ✨ 현재 날짜와 시간을 "2026-04-03 14:30:05" 형식으로 반환
+    function getNowDateTimeString() {
+      const d = new Date();
+      const date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const time = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+      return `${date} ${time}`;
+    }
+    
     function getTodayDateString() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
     function getMonthString() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
     function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
@@ -901,7 +909,7 @@ let listHtml = state.bosses.map(b => {
 
       state.currentMana -= amount;
       if(!state.logs) state.logs = [];
-      state.logs.push({ date: getTodayDateString(), amount: amount, memo: memo });
+      state.logs.push({ date: getNowDateTimeString(), amount: amount, memo: memo });
       
       document.getElementById('expenseAmount').value = ''; document.getElementById('expenseMemo').value = '';
       render(); saveState(); 
