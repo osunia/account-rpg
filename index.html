@@ -92,15 +92,28 @@
       transition: all 0.1s;
     }
 
-    .hero-node {
+.hero-node {
       position: absolute;
-      z-index: 100; 
+      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-left: -30px; margin-top: -35px; 
-      animation: floatHero 2s ease-in-out infinite; 
-      pointer-events: none; 
+      margin-left: -30px; margin-top: -35px;
+      animation: floatHero 2s ease-in-out infinite;
+      /* ✨ 수정: 고양이를 클릭할 수 있도록 변경 */
+      pointer-events: auto; 
+      cursor: pointer;
+    }
+
+    /* ✨ 용사 전용 말풍선 위치 (항상 아래로) */
+    .hero-node .speech-bubble {
+      bottom: auto; 
+      top: 85%;
+    }
+    .hero-node .speech-bubble::after {
+      top: auto; 
+      bottom: 100%; 
+      border-color: transparent transparent var(--black) transparent;
     }
 
     .hero-emoji {
@@ -389,6 +402,22 @@
       { name: "눈사람", emoji: "⛄", img: "Snowman%20without%20snow/3D/snowman_without_snow_3d.png" }
     ];
 
+    // ✨ 용사 고양이의 랜덤 대사 리스트 (총 45개)
+    const heroQuotes = [
+      // 소비 관련
+      "살까 말까 할 때는 사지 마라냥.", "지금 사는 그 물건 정말 필요한 거냐냥?", "지름신은 용사의 최대 적이다냥.", "영수증은 배신의 증거다냥.", "과소비는 보스보다 무섭다냥.", 
+      "충동구매는 패배의 지름길이다냥.", "장바구니를 비우면 마음이 가벼워진다냥.", "외식보다는 집밥이 최고다냥.", "세일이라고 다 싼 게 아니다냥.", "필요 없는 물건은 공짜라도 비싸다냥.",
+      "광고에 속지 마라냥.", "내일의 나에게 빚을 지지 마라냥.", "카드 긁는 소리에 심장이 아프다냥.", "물욕을 버리면 예산이 남는다냥.", "소비는 한순간이지만 후회는 길다냥.",
+      // 저축 관련
+      "티끌 모아 태산이다냥.", "푼돈이 목돈 된다냥.", "통장 잔고가 용사의 체력이다냥.", "적금은 든든한 갑옷이다냥.", "동전 한 개도 소중히 여겨라냥.", 
+      "저축은 미래를 위한 마나 충전이다냥.", "먼저 저축하고 남은 돈을 써라냥.", "부자가 되는 가장 빠른 길은 안 쓰는 거다냥.", "통장에 숫자가 늘어날 때가 제일 행복하다냥.", "비상금은 최후의 보루다냥.",
+      "복리의 마법을 믿어보라냥.", "작은 습관이 큰 부자를 만든다냥.", "저축은 배신하지 않는다냥.", "지갑을 닫으면 미래가 열린다냥.", "오늘 아낀 커피 한 잔이 미래의 연어캔이다냥.",
+      // 절약/응원 관련
+      "아껴야 잘 산다냥.", "낭비는 악이다냥.", "검소함은 용사의 덕목이다냥.", "오늘도 잘 참았다냥.", "예산을 지키는 네가 진정한 승자다냥.", 
+      "포기하지 말고 끝까지 방어해라냥.", "조금만 더 버티면 보너스 마나가 들어온다냥.", "절약은 궁색한 게 아니라 똑똑한 거다냥.", "가계부를 쓰는 손길이 아름답다냥.", "네 통장은 내가 지킨다냥.",
+      "할 수 있다냥.", "함께 예산 왕국을 지키자냥.", "너의 절제력을 믿는다냥.", "오늘도 한 걸음 성장했다냥.", "최고의 디펜스는 안 쓰는 거다냥."
+    ];
+
     function getEmojiImage(emojiStr, type = "node") {
       const found = monsterDic.find(m => m.emoji === emojiStr);
       let imgPath = found ? found.img : null;
@@ -456,11 +485,15 @@
           <div class="main-boss-dday">${calculateDday(mainBoss.targetDate)}</div>
         </div>`;
 
+// (render 함수 내부에서 고양이 그리는 부분 찾기)
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
+      
+      // ✨ 수정된 부분: onclick 추가 및 내부에 speech-bubble div 추가
       mapNodesContainer.innerHTML += `
-        <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;">
+        <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;" onclick="toggleHeroBubble(this, event)">
           ${getEmojiImage("😺")}
           ${getEmojiImage("🗡️", "weapon")}
+          <div class="speech-bubble"></div> 
         </div>`;
 
       for(let i=1; i < mapCoordinates.length; i++) { 
@@ -546,6 +579,24 @@
       }
     });
 
+// ✨ 용사 고양이 클릭 시 랜덤 대사 출력
+    function toggleHeroBubble(element, event) {
+      event.stopPropagation();
+      const isActive = element.classList.contains('active');
+      
+      closeAllBubbles(); // 다른 말풍선들 다 닫기
+
+      if(!isActive) {
+        element.classList.add('active');
+        // 랜덤 대사 선택
+        const randomQuote = heroQuotes[Math.floor(Math.random() * heroQuotes.length)];
+        // 말풍선 텍스트 교체 및 출력
+        const bubble = element.querySelector('.speech-bubble');
+        bubble.innerText = randomQuote;
+        bubble.style.display = 'block';
+      }
+    }
+    
     function toggleBubble(element, event) {
       event.stopPropagation(); 
       const isActive = element.classList.contains('active');
