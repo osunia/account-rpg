@@ -98,24 +98,25 @@
 
 .map-container { 
       flex: 1; position: relative; 
-      /* ✨ 1. 바다 색상 (기존보다 살짝 짙은 베이지로 육지와 대비) */
+      /* ✨ 바탕색만 남깁니다 */
       background-color: #dfcda5; 
-
-      /* ✨ 2. 지도 접힘선 + 양피지 노이즈 + 가장자리 빛바램 */
-      background-image: 
-        linear-gradient(rgba(139, 69, 19, 0.1) 1px, transparent 1px), /* 가로 접힘선 */
-        linear-gradient(90deg, rgba(139, 69, 19, 0.1) 1px, transparent 1px), /* 세로 접힘선 */
-        radial-gradient(circle at center, transparent 40%, rgba(139, 69, 19, 0.2) 100%), /* 빛바램 */
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
-      
-      /* ✨ 3. 접힘선이 가로세로 3등분(십자가 2줄)으로 보이도록 33.33% 사이즈 부여 */
-      background-size: 33.33% 33.33%, 33.33% 33.33%, 100% 100%, 200px 200px;
-      
       overflow: hidden; cursor: pointer; z-index: 10;
       box-shadow: inset 0 0 20px rgba(139, 69, 19, 0.2);
     }
     
-    /* ✨ 육지 SVG용 스타일 (바다 위에 뜨고 붉은 맵 경로 아래에 깔림) */
+    /* ✨ 1. 질감과 접힘선을 가상 요소로 분리하여 맵 '위'로 덮어씌움! */
+    .map-container::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background-image: 
+        linear-gradient(rgba(139, 69, 19, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139, 69, 19, 0.1) 1px, transparent 1px),
+        radial-gradient(circle at center, transparent 40%, rgba(139, 69, 19, 0.2) 100%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+      background-size: 33.33% 33.33%, 33.33% 33.33%, 100% 100%, 200px 200px;
+      pointer-events: none; /* 클릭 방해 금지 */
+      z-index: 5; /* 육지(0)와 맵 경로(1) 위로 올라오게 설정 */
+    }
+
     .land-svg {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
       pointer-events: none; z-index: 0; 
@@ -238,12 +239,14 @@
 <div class="map-container">
       <button class="summon-btn cartoon-btn" onclick="openModal('summonModal')">소환!</button>
       
-      <svg class="land-svg" viewBox="-50 -50 700 850" preserveAspectRatio="none">
-        <path d="M 0 0 L 1 11 L 6 17 L 4 21 L 0 28 L -1 35 L -1 42 L 1 45 L 2 49 L 2 52 L 2 57 L 2 61 L 5 64 L 9 67 L 14 67 L 17 63 L 17 63 L 23 66 L 32 67 L 38 66 L 42 62 L 44 58 L 45 55 L 50 55 L 51 54 L 53 48 L 51 44 L 49 43 L 49 42 L 54 40 L 60 38 L 64 34 L 66 32 L 74 35 L 80 42 L 82 42 L 87 37 L 89 29 L 89 24 L 85 21 L 79 14 L 80 9 L 81 5 L 79 3 L 76 -2 L 75 -4 L 73 -5 L 70 -2 L 66 2 L 62 5 L 58 5 L 53 2 L 51 -2 L 48 -5 L 46 -4 L 42 -2 L 39 3 L 36 7 L 31 6 L 28 2 L 26 -3 L 21 -5 L 15 -6 L 5 -5 L 0 0 M 149 99 L 122 107 L 100 112 L 90 116 L 79 123 L 63 123 L 41 118 L 34 116 L 30 121 L 22 132 L 14 145 L 4 166 L -5 169 L -20 179 L -24 183 L -26 194 L -24 201 L -23 207 L -23 218 L -26 221 L -29 231 L -24 242 L -16 247 L -12 255 L -7 264 L -1 264 L 12 252 L 22 239 L 28 237 L 34 245 L 41 244 L 58 228 L 71 225 L 79 226 L 87 239 L 73 253 L 62 257 L 50 261 L 50 271 L 46 285 L 41 293 L 39 303 L 41 315 L 28 327 L 22 331 L 19 338 L -23 350 L -26 377 L -8 395 L 6 395 L 22 401 L 33 409 L 57 397 L 79 384 L 92 381 L 92 363 L 93 357 L 111 363 L 128 374 L 147 374 L 159 373 L 160 393 L 154 405 L 157 424 L 173 441 L 179 454 L 175 475 L 160 482 L 155 489 L 147 502 L 141 514 L 125 525 L 122 543 L 116 560 L 112 572 L 125 610 L 138 626 L 154 651 L 171 658 L 198 656 L 214 646 L 221 616 L 232 605 L 225 591 L 219 576 L 224 565 L 240 568 L 248 573 L 265 565 L 295 546 L 307 546 L 321 559 L 321 570 L 321 578 L 324 586 L 326 595 L 315 608 L 313 616 L 323 630 L 321 637 L 316 651 L 332 672 L 345 686 L 362 713 L 378 729 L 397 734 L 415 728 L 423 726 L 443 726 L 453 720 L 455 707 L 463 689 L 472 672 L 469 661 L 450 658 L 440 658 L 445 646 L 461 635 L 466 626 L 459 611 L 448 610 L 431 615 L 418 626 L 401 632 L 393 630 L 391 619 L 393 603 L 401 597 L 418 595 L 424 592 L 432 581 L 448 572 L 464 575 L 472 575 L 483 565 L 493 541 L 510 529 L 533 522 L 553 511 L 561 490 L 555 471 L 539 467 L 533 457 L 542 441 L 547 428 L 545 424 L 529 420 L 520 412 L 531 393 L 525 377 L 510 366 L 493 366 L 475 379 L 456 392 L 431 393 L 413 381 L 405 357 L 410 341 L 418 331 L 424 320 L 434 309 L 448 311 L 461 311 L 469 296 L 475 271 L 474 260 L 464 253 L 456 249 L 439 245 L 428 241 L 426 225 L 429 220 L 440 204 L 458 207 L 480 214 L 498 207 L 507 202 L 514 212 L 521 215 L 537 204 L 539 191 L 533 182 L 529 163 L 529 147 L 515 136 L 502 132 L 496 126 L 490 115 L 483 102 L 475 91 L 463 85 L 451 59 L 442 51 L 421 50 L 412 62 L 408 81 L 396 101 L 378 112 L 358 110 L 350 96 L 350 81 L 358 72 L 362 64 L 361 46 L 358 37 L 358 21 L 346 13 L 334 8 L 323 -4 L 318 -16 L 286 -20 L 281 -25 L 273 -38 L 213 -47 L 203 -19 L 210 -1 L 210 10 L 163 21 L 159 11 L 155 -3 L 147 -6 L 140 -4 L 133 8 L 133 16 L 140 27 L 135 40 L 127 50 L 127 56 L 135 69 L 146 78 L 149 82 L 153 86 L 153 88 L 152 94 L 149 99 L 149 100 M 555 316 L 551 315 L 546 314 L 542 312 L 539 319 L 542 323 L 550 329 L 553 336 L 552 340 L 547 345 L 553 360 L 559 366 L 559 372 L 561 380 L 568 387 L 562 395 L 557 400 L 557 404 L 564 407 L 577 412 L 584 426 L 582 431 L 581 440 L 581 446 L 585 455 L 587 458 L 593 453 L 599 444 L 610 433 L 615 428 L 615 414 L 615 400 L 613 385 L 599 373 L 596 362 L 595 351 L 591 341 L 586 336 L 581 332 L 577 325 L 573 320 L 566 320 L 560 318 L 555 316 L 555 316 M 114 443 L 114 442 L 114 438 L 108 434 L 101 434 L 95 438 L 95 449 L 92 459 L 84 461 L 81 462 L 74 469 L 74 480 L 82 489 L 87 502 L 89 508 L 101 505 L 109 497 L 114 486 L 121 481 L 121 470 L 119 462 L 116 456 L 114 442 L 114 438 L 114 438 M -227 -35" 
-              fill="#f5e6c4" /* 육지의 밝은 베이지 색상 */
-              stroke="#c2a378" /* 대륙 테두리 색상 */
-              stroke-width="3" 
-              stroke-linejoin="round" />
+<svg class="land-svg" viewBox="-50 -50 700 850" preserveAspectRatio="none">
+        <defs>
+          <path id="continentPath" d="M 0 0 L 1 11 L 6 17 L 4 21 L 0 28 L -1 35 L -1 42 L 1 45 L 2 49 L 2 52 L 2 57 L 2 61 L 5 64 L 9 67 L 14 67 L 17 63 L 17 63 L 23 66 L 32 67 L 38 66 L 42 62 L 44 58 L 45 55 L 50 55 L 51 54 L 53 48 L 51 44 L 49 43 L 49 42 L 54 40 L 60 38 L 64 34 L 66 32 L 74 35 L 80 42 L 82 42 L 87 37 L 89 29 L 89 24 L 85 21 L 79 14 L 80 9 L 81 5 L 79 3 L 76 -2 L 75 -4 L 73 -5 L 70 -2 L 66 2 L 62 5 L 58 5 L 53 2 L 51 -2 L 48 -5 L 46 -4 L 42 -2 L 39 3 L 36 7 L 31 6 L 28 2 L 26 -3 L 21 -5 L 15 -6 L 5 -5 L 0 0 M 149 99 L 122 107 L 100 112 L 90 116 L 79 123 L 63 123 L 41 118 L 34 116 L 30 121 L 22 132 L 14 145 L 4 166 L -5 169 L -20 179 L -24 183 L -26 194 L -24 201 L -23 207 L -23 218 L -26 221 L -29 231 L -24 242 L -16 247 L -12 255 L -7 264 L -1 264 L 12 252 L 22 239 L 28 237 L 34 245 L 41 244 L 58 228 L 71 225 L 79 226 L 87 239 L 73 253 L 62 257 L 50 261 L 50 271 L 46 285 L 41 293 L 39 303 L 41 315 L 28 327 L 22 331 L 19 338 L -23 350 L -26 377 L -8 395 L 6 395 L 22 401 L 33 409 L 57 397 L 79 384 L 92 381 L 92 363 L 93 357 L 111 363 L 128 374 L 147 374 L 159 373 L 160 393 L 154 405 L 157 424 L 173 441 L 179 454 L 175 475 L 160 482 L 155 489 L 147 502 L 141 514 L 125 525 L 122 543 L 116 560 L 112 572 L 125 610 L 138 626 L 154 651 L 171 658 L 198 656 L 214 646 L 221 616 L 232 605 L 225 591 L 219 576 L 224 565 L 240 568 L 248 573 L 265 565 L 295 546 L 307 546 L 321 559 L 321 570 L 321 578 L 324 586 L 326 595 L 315 608 L 313 616 L 323 630 L 321 637 L 316 651 L 332 672 L 345 686 L 362 713 L 378 729 L 397 734 L 415 728 L 423 726 L 443 726 L 453 720 L 455 707 L 463 689 L 472 672 L 469 661 L 450 658 L 440 658 L 445 646 L 461 635 L 466 626 L 459 611 L 448 610 L 431 615 L 418 626 L 401 632 L 393 630 L 391 619 L 393 603 L 401 597 L 418 595 L 424 592 L 432 581 L 448 572 L 464 575 L 472 575 L 483 565 L 493 541 L 510 529 L 533 522 L 553 511 L 561 490 L 555 471 L 539 467 L 533 457 L 542 441 L 547 428 L 545 424 L 529 420 L 520 412 L 531 393 L 525 377 L 510 366 L 493 366 L 475 379 L 456 392 L 431 393 L 413 381 L 405 357 L 410 341 L 418 331 L 424 320 L 434 309 L 448 311 L 461 311 L 469 296 L 475 271 L 474 260 L 464 253 L 456 249 L 439 245 L 428 241 L 426 225 L 429 220 L 440 204 L 458 207 L 480 214 L 498 207 L 507 202 L 514 212 L 521 215 L 537 204 L 539 191 L 533 182 L 529 163 L 529 147 L 515 136 L 502 132 L 496 126 L 490 115 L 483 102 L 475 91 L 463 85 L 451 59 L 442 51 L 421 50 L 412 62 L 408 81 L 396 101 L 378 112 L 358 110 L 350 96 L 350 81 L 358 72 L 362 64 L 361 46 L 358 37 L 358 21 L 346 13 L 334 8 L 323 -4 L 318 -16 L 286 -20 L 281 -25 L 273 -38 L 213 -47 L 203 -19 L 210 -1 L 210 10 L 163 21 L 159 11 L 155 -3 L 147 -6 L 140 -4 L 133 8 L 133 16 L 140 27 L 135 40 L 127 50 L 127 56 L 135 69 L 146 78 L 149 82 L 153 86 L 153 88 L 152 94 L 149 99 L 149 100 M 555 316 L 551 315 L 546 314 L 542 312 L 539 319 L 542 323 L 550 329 L 553 336 L 552 340 L 547 345 L 553 360 L 559 366 L 559 372 L 561 380 L 568 387 L 562 395 L 557 400 L 557 404 L 564 407 L 577 412 L 584 426 L 582 431 L 581 440 L 581 446 L 585 455 L 587 458 L 593 453 L 599 444 L 610 433 L 615 428 L 615 414 L 615 400 L 613 385 L 599 373 L 596 362 L 595 351 L 591 341 L 586 336 L 581 332 L 577 325 L 573 320 L 566 320 L 560 318 L 555 316 L 555 316 M 114 443 L 114 442 L 114 438 L 108 434 L 101 434 L 95 438 L 95 449 L 92 459 L 84 461 L 81 462 L 74 469 L 74 480 L 82 489 L 87 502 L 89 508 L 101 505 L 109 497 L 114 486 L 121 481 L 121 470 L 119 462 L 116 456 L 114 442 L 114 438 L 114 438 M -227 -35" />
+        </defs>
+        
+        <use href="#continentPath" fill="none" stroke="rgba(194, 163, 120, 0.2)" stroke-width="25" stroke-linejoin="round" />
+        <use href="#continentPath" fill="none" stroke="rgba(194, 163, 120, 0.4)" stroke-width="12" stroke-linejoin="round" />
+        <use href="#continentPath" fill="#f5e6c4" stroke="#c2a378" stroke-width="3" stroke-linejoin="round" />
       </svg>
 
       <svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -550,9 +553,31 @@
           <div class="speech-bubble flip-down" style="${heroBubbleStyle}"></div> 
         </div>`;
 
-      for(let i=1; i < mapCoordinates.length; i++) { 
-        pathD += `L ${mapCoordinates[i].x} ${mapCoordinates[i].y} `; 
+// ✨ 3. 맵 경로를 부드러운 곡선(라운드 코너)으로 깎아내는 로직!
+      const radius = 5; // 꺾이는 부분의 둥글기 (숫자를 키우면 더 둥글어집니다)
+      
+      for(let i=1; i < mapCoordinates.length - 1; i++) { 
+        let p0 = mapCoordinates[i-1], p1 = mapCoordinates[i], p2 = mapCoordinates[i+1];
+        
+        let dx1 = p1.x - p0.x, dy1 = p1.y - p0.y;
+        let len1 = Math.sqrt(dx1*dx1 + dy1*dy1);
+        let dx2 = p2.x - p1.x, dy2 = p2.y - p1.y;
+        let len2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+        
+        // 선분이 너무 짧으면 곡선 반지름을 조절
+        let r1 = Math.min(radius, len1 / 2);
+        let r2 = Math.min(radius, len2 / 2);
+        
+        let qx1 = p1.x - (dx1/len1) * r1;
+        let qy1 = p1.y - (dy1/len1) * r1;
+        let qx2 = p1.x + (dx2/len2) * r2;
+        let qy2 = p1.y + (dy2/len2) * r2;
+        
+        // 모서리 직전까지 직선(L)을 긋고 -> 모서리에서 베지어 곡선(Q)으로 부드럽게 턴!
+        pathD += `L ${qx1} ${qy1} Q ${p1.x} ${p1.y} ${qx2} ${qy2} `;
       }
+      // 마지막 좌표 연결
+      pathD += `L ${mapCoordinates[mapCoordinates.length-1].x} ${mapCoordinates[mapCoordinates.length-1].y}`;
       mapPath.setAttribute('d', pathD.trim());
 
       let segments = [];
