@@ -429,7 +429,6 @@
       let percent = (state.currentMana / mainBoss.hp) * 100;
       document.getElementById('manaBar').style.width = `${Math.min(percent, 100)}%`;
 
-      // ✨ 드롭다운 리스트 HTML 생성 (날짜는 깔끔하게 10자리만 자르기!)
       let listHtml = state.bosses.map(b => {
         const cleanDate = String(b.targetDate).substring(0, 10);
         return `
@@ -540,6 +539,7 @@
         const b = n.querySelector('.speech-bubble');
         if(b) {
           b.style.display = 'none'; 
+          b.style.visibility = ''; // ✨ 스텔스 모드 해제
           b.style.left = '50%'; 
           b.style.right = 'auto';
           b.style.transform = 'translateX(-50%)';
@@ -561,26 +561,32 @@
       
       closeAllBubbles(); 
       element.classList.add('active');
-      bubble.style.display = 'block';
       bubble.innerText = randomQuote;
+      
+      // ✨ 스텔스 측정 모드: 투명 상태로 켜기 (깜빡임 완벽 제거!)
+      bubble.style.visibility = 'hidden'; 
+      bubble.style.display = 'block';
       
       bubble.style.left = '50%'; 
       bubble.style.right = 'auto';
       bubble.style.transform = 'translateX(-50%)';
       
-      setTimeout(() => {
-        const rect = bubble.getBoundingClientRect();
-        const mapRect = document.querySelector('.map-container').getBoundingClientRect();
-        if (rect.left < mapRect.left + 10) {
-          bubble.style.left = '10px'; 
-          bubble.style.transform = 'none';
-        } 
-        else if (rect.right > mapRect.right - 10) {
-          bubble.style.left = 'auto'; 
-          bubble.style.right = '10px'; 
-          bubble.style.transform = 'none';
-        }
-      }, 10);
+      // ✨ setTimeout 없이 즉시 계산
+      const rect = bubble.getBoundingClientRect();
+      const mapRect = document.querySelector('.map-container').getBoundingClientRect();
+      
+      if (rect.left < mapRect.left + 10) {
+        bubble.style.left = '10px'; 
+        bubble.style.transform = 'none';
+      } 
+      else if (rect.right > mapRect.right - 10) {
+        bubble.style.left = 'auto'; 
+        bubble.style.right = '10px'; 
+        bubble.style.transform = 'none';
+      }
+      
+      // ✨ 위치 세팅 끝! 이제 눈에 보이게 변경
+      bubble.style.visibility = 'visible'; 
     }
     
     function toggleBubble(element, event) {
@@ -591,24 +597,30 @@
       if(!isActive) {
         element.classList.add('active');
         const bubble = element.querySelector('.speech-bubble');
+        
+        // ✨ 스텔스 측정 모드: 투명 상태로 켜기
+        bubble.style.visibility = 'hidden';
         bubble.style.display = 'block'; 
         
-        setTimeout(() => {
-          const rect = bubble.getBoundingClientRect();
-          const mapRect = document.querySelector('.map-container').getBoundingClientRect();
-          if (rect.left < mapRect.left + 10) {
-            bubble.style.left = '10px'; 
-            bubble.style.transform = 'none';
-          } 
-          else if (rect.right > mapRect.right - 10) {
-            bubble.style.left = 'auto'; 
-            bubble.style.right = '10px'; 
-            bubble.style.transform = 'none';
-          }
-          if (rect.top < mapRect.top + 50) {
-            bubble.classList.add('flip-down');
-          }
-        }, 10);
+        // ✨ setTimeout 없이 즉시 계산
+        const rect = bubble.getBoundingClientRect();
+        const mapRect = document.querySelector('.map-container').getBoundingClientRect();
+        
+        if (rect.left < mapRect.left + 10) {
+          bubble.style.left = '10px'; 
+          bubble.style.transform = 'none';
+        } 
+        else if (rect.right > mapRect.right - 10) {
+          bubble.style.left = 'auto'; 
+          bubble.style.right = '10px'; 
+          bubble.style.transform = 'none';
+        }
+        if (rect.top < mapRect.top + 50) {
+          bubble.classList.add('flip-down');
+        }
+        
+        // ✨ 위치 세팅 끝! 이제 눈에 보이게 변경
+        bubble.style.visibility = 'visible';
       }
     }
 
@@ -655,7 +667,6 @@
       document.getElementById('editBossId').value = boss.id;
       document.getElementById('editBossName').value = extractEventName(boss.name, boss.emoji);
       document.getElementById('editBossHp').value = boss.hp;
-      // ✨ 여기서도 날짜를 10자리만 딱 잘라서 넣어줍니다!
       document.getElementById('editBossDate').value = String(boss.targetDate).substring(0, 10);
       
       openModal('editBossModal');
@@ -681,14 +692,12 @@
       }
     }
 
-    // ✨ 커스텀 삭제 모달 호출 함수
     function deleteBoss(id, event) {
-      event.stopPropagation(); // ❌ 리스트 누를 때 켜지는 수정창 방어!
+      event.stopPropagation(); 
       document.getElementById('deleteBossId').value = id;
-      openModal('confirmDeleteModal'); // 귀여운 커스텀 모달 오픈
+      openModal('confirmDeleteModal'); 
     }
 
-    // ✨ 실제 삭제 실행 함수
     function executeDeleteBoss() {
       const id = parseInt(document.getElementById('deleteBossId').value);
       state.bosses = state.bosses.filter(b => b.id !== id);
