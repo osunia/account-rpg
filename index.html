@@ -156,6 +156,7 @@
     .tab-btn { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 13px; }
     .tab-btn.active { background: var(--point-yellow); }
     .log-list { list-style: none; padding: 0; margin: 0; border-top: 2px solid var(--black); }
+    .log-item { justify-content: center; font-size: 10px; }
     
     /* 쪼개기 아코디언 관련 CSS */
     .log-accordion-item { border-bottom: 1px dashed #ccc; padding: 5px 0; }
@@ -734,7 +735,7 @@
     function attackBoss() {
       const amount = parseInt(document.getElementById('expenseAmount').value);
       const memo = document.getElementById('expenseMemo').value.trim() || "일반 공격";
-      if (isNaN(amount) || amount <= 0) { showAlert("공격 금액을 똑바로 입력하시지!"); return; }
+      if (isNaN(amount) || amount <= 0) { showAlert("공격 금액을 똑바로 입력해라냥!"); return; }
 
       state.currentMana -= amount;
       if(!state.logs) state.logs = [];
