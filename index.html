@@ -485,10 +485,8 @@
           <div class="main-boss-dday">${calculateDday(mainBoss.targetDate)}</div>
         </div>`;
 
-// (render 함수 내부에서 고양이 그리는 부분 찾기)
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
       
-      // ✨ 수정된 부분: onclick 추가 및 내부에 speech-bubble div 추가
       mapNodesContainer.innerHTML += `
         <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;" onclick="toggleHeroBubble(this, event)">
           ${getEmojiImage("😺")}
@@ -511,24 +509,20 @@
         totalPathLength += dist;
       }
 
-      // ✨ [정교화된 30일 지평선 및 겹침 방지 로직]
       const todayObj = parseDateToNoon(getTodayDateString());
       const allBosses = state.bosses;
       
-      const HORIZON_DAYS = 30; // 30일 지평선
-      // ✨ 수정: 곡선 지수 0.65 -> 0.85 상향! (가까운 날짜일수록 용사 코앞으로 바짝 당겨짐)
+      const HORIZON_DAYS = 30; 
       const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.85); 
       const assignedRatios = []; 
 
       allBosses.forEach((boss) => {
         const targetObj = parseDateToNoon(boss.targetDate);
-        // D-DAY 이면 0일, 그 외에는 남은 일수
         let diffDays = Math.max(0, Math.round((targetObj - todayObj) / 86400000));
         
-        let scaledDays = Math.pow(diffDays, 0.85); // ✨ 수정
+        let scaledDays = Math.pow(diffDays, 0.85); 
         let ratio = Math.min(1, scaledDays / maxScaledHorizon);
         
-        // 💡 겹침 방지: 같은 날짜나 너무 가까우면 살짝 뒤로 밈 (겹쳐서 안 보이는 현상 방지)
         let conflictCount = assignedRatios.filter(r => Math.abs(r - ratio) < 0.035).length;
         if (conflictCount > 0) {
           ratio += (conflictCount * 0.035);
@@ -536,7 +530,6 @@
         }
         assignedRatios.push(ratio);
 
-        // 고양이 코앞(8%)부터 맵의 끝(100%)까지 분배
         let targetDist = totalPathLength * (0.03 + (ratio * 0.97));
         
         let posX = mapCoordinates[mapCoordinates.length - 1].x;
@@ -559,8 +552,9 @@
       });
     }
 
+    // ✨ 수정: 몹(map-node) 뿐만 아니라 고양이(hero-node)의 말풍선도 닫도록 강화
     function closeAllBubbles() {
-      document.querySelectorAll('.map-node').forEach(n => {
+      document.querySelectorAll('.map-node, .hero-node').forEach(n => {
         n.classList.remove('active');
         const b = n.querySelector('.speech-bubble');
         if(b) {
@@ -573,28 +567,48 @@
       });
     }
 
+    // ✨ 수정: 바탕화면 클릭 시 몹이나 고양이가 아니면 말풍선 닫기
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('.map-node')) {
+      if (!e.target.closest('.map-node') && !e.target.closest('.hero-node')) {
         closeAllBubbles();
       }
     });
 
-// ✨ 용사 고양이 클릭 시 랜덤 대사 출력
+    // ✨ 용사 고양이 전용 랜덤 멘트 및 위치 보정 함수
     function toggleHeroBubble(element, event) {
       event.stopPropagation();
-      const isActive = element.classList.contains('active');
       
-      closeAllBubbles(); // 다른 말풍선들 다 닫기
+      // 누를 때마다 무조건 멘트가 바뀌어야 하므로 우선 다 닫습니다.
+      closeAllBubbles();
 
-      if(!isActive) {
-        element.classList.add('active');
-        // 랜덤 대사 선택
-        const randomQuote = heroQuotes[Math.floor(Math.random() * heroQuotes.length)];
-        // 말풍선 텍스트 교체 및 출력
-        const bubble = element.querySelector('.speech-bubble');
-        bubble.innerText = randomQuote;
-        bubble.style.display = 'block';
-      }
+      // 고양이 말풍선을 강제로 활성화
+      element.classList.add('active');
+      const randomQuote = heroQuotes[Math.floor(Math.random() * heroQuotes.length)];
+      const bubble = element.querySelector('.speech-bubble');
+      
+      // 혹시 틀어져 있을 수 있는 기본 위치 중앙 정렬
+      bubble.style.left = '50%'; 
+      bubble.style.right = 'auto';
+      bubble.style.transform = 'translateX(-50%)';
+      
+      bubble.innerText = randomQuote;
+      bubble.style.display = 'block';
+      
+      // ✨ 수정: 몹과 동일하게 화면 양끝으로 나가지 않도록 벽 감지 및 이동 로직 추가!
+      setTimeout(() => {
+        const rect = bubble.getBoundingClientRect();
+        const mapRect = document.querySelector('.map-container').getBoundingClientRect();
+
+        if (rect.left < mapRect.left + 10) {
+          bubble.style.left = '0'; 
+          bubble.style.transform = 'translateX(10%)';
+        } 
+        else if (rect.right > mapRect.right - 10) {
+          bubble.style.left = 'auto'; 
+          bubble.style.right = '0'; 
+          bubble.style.transform = 'translateX(-10%)';
+        }
+      }, 10);
     }
     
     function toggleBubble(element, event) {
@@ -636,9 +650,7 @@
       return diff === 0 ? "D-DAY" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
     }
 
-    // ✨ 서버 & 로컬 하이브리드 저장
     function saveState() {
-      // 화면 갱신 즉시 로컬스토리지에도 최신 상태 저장
       localStorage.setItem('rpg_defense_state', JSON.stringify(state)); 
 
       fetch(GAS_URL, {
@@ -754,14 +766,12 @@
       }
     }
 
-    // ✨ 앱 구동 진입점 (Local-First + Background Sync)
     function init() {
       if(!GAS_URL || GAS_URL.includes("여기에_고객님의_GAS_URL")) {
         showAlert("GAS URL이 설정되지 않았습니다! 코드에 URL을 넣어주세요.");
         render(); return;
       }
       
-      // 1. 브라우저 캐시에서 즉시 렌더링 (로딩창 없음)
       const localData = localStorage.getItem('rpg_defense_state');
       let hasLocalData = false;
       if (localData) {
@@ -772,7 +782,6 @@
       
       if (!hasLocalData) showLoading(); 
 
-      // 2. 백그라운드 조용히 서버 데이터 갱신
       fetch(GAS_URL + "?t=" + new Date().getTime())
         .then(response => response.json())
         .then(serverState => {
@@ -785,7 +794,6 @@
               showAlert(state.syncMessages.join("<br>"));
             }
             
-            // 데이터가 로컬과 다를 때만 화면 새로 그리기 (깜빡임 최소화)
             if (prevStateStr !== JSON.stringify(state) || !hasLocalData) {
               render(); 
             }
@@ -801,7 +809,6 @@
         });
     }
 
-    // 폰 화면을 켰을 때(탭 복귀) 백그라운드 싱크 발동
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         init(); 
