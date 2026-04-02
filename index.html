@@ -426,16 +426,40 @@
 
     const MS_EMOJI_BASE = "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/";
     
-    const monsterDic = [
-      { name: "유령", emoji: "👻", img: "Ghost/3D/ghost_3d.png" }, { name: "외계인", emoji: "👾", img: "Alien%20monster/3D/alien_monster_3d.png" }, 
-      { name: "로봇", emoji: "🤖", img: "Robot/3D/robot_3d.png" }, { name: "피자", emoji: "🍕", img: "Pizza/3D/pizza_3d.png" }, 
-      { name: "케이크", emoji: "🍰", img: "Shortcake/3D/shortcake_3d.png" }, { name: "늑대", emoji: "🐺", img: "Wolf/3D/wolf_3d.png" },
-      { name: "악어", emoji: "🐊", img: "Crocodile/3D/crocodile_3d.png" }, { name: "해파리", emoji: "🪼", img: "Jellyfish/3D/jellyfish_3d.png" }, 
-      { name: "잭오랜턴", emoji: "🎃", img: "Jack-o-lantern/3D/jack-o-lantern_3d.png" }, { name: "마왕", emoji: "👑", img: "Crown/3D/crown_3d.png" }, 
-      { name: "골렘", emoji: "🪨", img: "Rock/3D/rock_3d.png" }, { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" },
-      { name: "단검", emoji: "🗡️", img: "Dagger/3D/dagger_3d.png" }, { name: "피냐타", emoji: "🪅", img: "Piñata/3D/piñata_3d.png" },
-      { name: "타코", emoji: "🌮", img: "Taco/3D/taco_3d.png" }, { name: "주먹밥", emoji: "🍙", img: "Rice%20ball/3D/rice_ball_3d.png" },
-      { name: "선인장", emoji: "🌵", img: "Cactus/3D/cactus_3d.png" }, { name: "눈사람", emoji: "⛄", img: "Snowman%20without%20snow/3D/snowman_without_snow_3d.png" }
+const monsterDic = [
+      // 👻 기존 몹들
+      { name: "유령", emoji: "👻", img: "Ghost/3D/ghost_3d.png" }, 
+      { name: "외계인", emoji: "👾", img: "Alien%20monster/3D/alien_monster_3d.png" }, 
+      { name: "로봇", emoji: "🤖", img: "Robot/3D/robot_3d.png" }, 
+      { name: "피자", emoji: "🍕", img: "Pizza/3D/pizza_3d.png" }, 
+      { name: "케이크", emoji: "🍰", img: "Shortcake/3D/shortcake_3d.png" }, 
+      { name: "늑대인간", emoji: "🐺", img: "Wolf/3D/wolf_3d.png" },
+      { name: "악어", emoji: "🐊", img: "Crocodile/3D/crocodile_3d.png" }, 
+      { name: "해파리", emoji: "🪼", img: "Jellyfish/3D/jellyfish_3d.png" }, 
+      { name: "잭오랜턴", emoji: "🎃", img: "Jack-o-lantern/3D/jack-o-lantern_3d.png" }, 
+      { name: "마왕", emoji: "👑", img: "Crown/3D/crown_3d.png" }, 
+      { name: "골렘", emoji: "🪨", img: "Rock/3D/rock_3d.png" }, 
+      { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" },
+      { name: "단검", emoji: "🗡️", img: "Dagger/3D/dagger_3d.png" }, 
+      { name: "피냐타", emoji: "🪅", img: "Piñata/3D/piñata_3d.png" },
+      { name: "타코", emoji: "🌮", img: "Taco/3D/taco_3d.png" }, 
+      { name: "주먹밥", emoji: "🍙", img: "Rice%20ball/3D/rice_ball_3d.png" },
+      { name: "선인장", emoji: "🌵", img: "Cactus/3D/cactus_3d.png" }, 
+      { name: "눈사람", emoji: "⛄", img: "Snowman%20without%20snow/3D/snowman_without_snow_3d.png" },
+      
+      // ✨ 새로 추가된 몹들!
+      { name: "마트료시카", emoji: "🪆", img: "Nesting%20dolls/3D/nesting_dolls_3d.png" },
+      { name: "조커", emoji: "🃏", img: "Joker/3D/joker_3d.png" },
+      { name: "모아이", emoji: "🗿", img: "Moai/3D/moai_3d.png" },
+      { name: "팝콘", emoji: "🍿", img: "Popcorn/3D/popcorn_3d.png" },
+      { name: "치즈", emoji: "🧀", img: "Cheese%20wedge/3D/cheese_wedge_3d.png" },
+      { name: "도넛", emoji: "🍩", img: "Doughnut/3D/doughnut_3d.png" },
+      { name: "롤리팝", emoji: "🍭", img: "Lollipop/3D/lollipop_3d.png" },
+      { name: "당근", emoji: "🥕", img: "Carrot/3D/carrot_3d.png" },
+      { name: "루돌프", emoji: "🦌", img: "Deer/3D/deer_3d.png" },
+      { name: "라마", emoji: "🦙", img: "Llama/3D/llama_3d.png" },
+      { name: "모비딕", emoji: "🐋", img: "Whale/3D/whale_3d.png" },
+      { name: "피닉스", emoji: "🐦‍🔥", img: "Phoenix/3D/phoenix_3d.png" }
     ];
 
     const heroQuotes = [
