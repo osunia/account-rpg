@@ -250,12 +250,20 @@
       </svg>
 
       <svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <defs>
+          <filter id="inkBleed" x="-10%" y="-10%" width="120%" height="120%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04 0.12" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+        
         <path id="mapPath" d="" fill="none" 
               stroke="#b32424" 
               stroke-width="6" 
               stroke-linecap="round" 
               stroke-linejoin="round" 
               stroke-dasharray="10, 12" 
+              filter="url(#inkBleed)" /* ✨ 필터 적용냥! */
               vector-effect="non-scaling-stroke" />
       </svg>
       
@@ -554,7 +562,7 @@
         </div>`;
 
 // ✨ 3. 맵 경로를 부드러운 곡선(라운드 코너)으로 깎아내는 로직!
-      const radius = 5; // 꺾이는 부분의 둥글기 (숫자를 키우면 더 둥글어집니다)
+      const radius = 25; // 꺾이는 부분의 둥글기 (숫자를 키우면 더 둥글어집니다)
       
       for(let i=1; i < mapCoordinates.length - 1; i++) { 
         let p0 = mapCoordinates[i-1], p1 = mapCoordinates[i], p2 = mapCoordinates[i+1];
