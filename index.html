@@ -96,7 +96,14 @@
     .boss-delete-btn { color: #aaa; background: none; border: none; font-size: 16px; cursor: pointer; padding: 5px; transition: 0.2s; }
     .boss-delete-btn:active { color: var(--point-red); transform: scale(0.9); }
 
-    .map-container { flex: 1; position: relative; background-color: #66ab5e; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px; overflow: hidden; cursor: pointer; z-index: 10;}
+    .map-container { 
+      flex: 1; position: relative; 
+      /* ✨ 1. 바탕색: 양피지 느낌의 베이지색 */
+      background-color: #e8d8b7; 
+      /* ✨ 2. 점 패턴 색상: 바탕색보다 살짝 진한 톤으로 은은하게 */
+      background-image: radial-gradient(#d4c4a1 1px, transparent 1px); 
+      background-size: 20px 20px; overflow: hidden; cursor: pointer; z-index: 10;
+    }
     .map-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
     
     .summon-btn { position: absolute; bottom: 12px; left: 12px; z-index: 20; padding: 6px 10px; font-size: 13px; background: #fff; border: var(--border-thick); box-shadow: var(--box-shadow); border-radius: 12px; font-weight: bold; cursor: pointer; color: var(--point-blue); }
@@ -214,8 +221,14 @@
 
     <div class="map-container">
       <button class="summon-btn cartoon-btn" onclick="openModal('summonModal')">소환!</button>
-      <svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <path id="mapPath" d="" fill="none" stroke="#fae9a5" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="30, 25" vector-effect="non-scaling-stroke" />
+<svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path id="mapPath" d="" fill="none" 
+              stroke="#b32424"               /* ✨ 1. 선 색상: 옛날 지도에 어울리는 약간 탁한 붉은색 */
+              stroke-width="6"               /* ✨ 2. 선 굵기: 15 -> 6으로 확 줄여서 얇고 정교하게 */
+              stroke-linecap="round"         /* ✨ 3. 선 끝 모양: 얇은 상태에서 round를 주면 펜으로 찍은 듯한 미세한 둥글기만 남음 */
+              stroke-linejoin="round" 
+              stroke-dasharray="10, 12"      /* ✨ 4. 점선 간격: 선이 얇아졌으므로 점선 길이(10)와 여백(12)도 오밀조밀하게 조절 */
+              vector-effect="non-scaling-stroke" />
       </svg>
       <div id="mapNodesContainer"></div>
     </div>
