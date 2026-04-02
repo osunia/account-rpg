@@ -1131,10 +1131,15 @@ let listHtml = state.bosses.map(b => {
       grid.querySelectorAll('.day-cell').forEach(e => e.remove());
       const dailyTotals = {};
       if(!state.logs) state.logs = [];
-      state.logs.forEach(l => { 
+state.logs.forEach(l => { 
         if(l.date) { 
-          const [ly, lm, ld] = l.date.split('-'); 
-          if (parseInt(ly) === y && parseInt(lm) === m + 1) dailyTotals[parseInt(ld)] = (dailyTotals[parseInt(ld)] || 0) + l.amount; 
+          // ✨ 수정: 서버에서 온 긴 날짜를 무조건 YYYY-MM-DD로 깨끗하게 만든 뒤에 쪼갭니다냥!
+          const cleanDate = formatDateString(l.date);
+          const [ly, lm, ld] = cleanDate.split('-'); 
+          
+          if (parseInt(ly) === y && parseInt(lm) === m + 1) {
+            dailyTotals[parseInt(ld)] = (dailyTotals[parseInt(ld)] || 0) + l.amount; 
+          }
         }
       });
       const fDay = new Date(y, m, 1).getDay(), dInM = new Date(y, m + 1, 0).getDate();
