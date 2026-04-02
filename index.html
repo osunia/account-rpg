@@ -98,21 +98,27 @@
 
 .map-container { 
       flex: 1; position: relative; 
-      /* ✨ 1. 바탕색: 따뜻한 베이지 (양피지 기본색) */
-      background-color: #e8d8b7; 
+      /* ✨ 1. 바탕색: 양피지 느낌의 크림색 (바다색) */
+      background-color: #f5e5c0; 
 
-      /* ✨ 2. 양피지 질감 마법: 가장자리 빛바램(그라데이션) + 거친 종이 질감(SVG 노이즈) */
+      /* ✨ 2. 양피지 질감 & 접힘 마법: 얇은 격자 패턴 + 수평 접힘선 */
       background-image: 
-        radial-gradient(circle at center, transparent 40%, rgba(139, 69, 19, 0.1) 100%),
-        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+        linear-gradient(rgba(139, 69, 19, 0.05) 1px, transparent 1px), /* 얇은 가로줄 */
+        linear-gradient(90deg, rgba(139, 69, 19, 0.05) 1px, transparent 1px), /* 얇은 세로줄 */
+        linear-gradient(transparent 40%, rgba(139, 69, 19, 0.08) 45%, transparent 50%); /* 수평 접힘선 */
+      background-size: 20px 20px, 20px 20px, 100% 50%;
       
       overflow: hidden; 
       cursor: pointer; 
       z-index: 10;
 
-      /* ✨ 3. 액자 안쪽 그림자: 지도가 살짝 눌린 듯한 입체감 부여 */
-      box-shadow: inset 0 0 20px rgba(139, 69, 19, 0.15);
+      /* ✨ 3. 가장자리 찢어짐 효과: clip-path를 사용하여 찢어진 불규칙한 가장자리 구현 */
+      clip-path: polygon(100% 0, 98% 2%, 99% 5%, 97% 8%, 98% 12%, 96% 15%, 97% 19%, 95% 23%, 96% 27%, 94% 31%, 95% 35%, 93% 39%, 94% 43%, 92% 47%, 93% 51%, 91% 55%, 92% 59%, 90% 63%, 91% 67%, 89% 71%, 90% 75%, 88% 79%, 89% 83%, 87% 87%, 88% 91%, 86% 95%, 87% 100%, 0% 100%, 2% 98%, 1% 95%, 3% 92%, 2% 88%, 4% 85%, 3% 81%, 5% 77%, 4% 73%, 6% 69%, 5% 65%, 7% 61%, 6% 57%, 8% 53%, 7% 49%, 9% 45%, 8% 41%, 10% 37%, 9% 33%, 11% 29%, 10% 25%, 12% 21%, 11% 17%, 13% 13%, 12% 9%, 14% 5%, 13% 2%, 15% 0%, 100% 0%);
+
+      /* ✨ 4. 액자 안쪽 그림자: 입체감 부여 */
+      box-shadow: inset 0 0 30px rgba(139, 69, 19, 0.15);
     }
+    
     .map-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
     
     .summon-btn { position: absolute; bottom: 12px; left: 12px; z-index: 20; padding: 6px 10px; font-size: 13px; background: #fff; border: var(--border-thick); box-shadow: var(--box-shadow); border-radius: 12px; font-weight: bold; cursor: pointer; color: var(--point-blue); }
@@ -232,11 +238,11 @@
       <button class="summon-btn cartoon-btn" onclick="openModal('summonModal')">소환!</button>
 <svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
         <path id="mapPath" d="" fill="none" 
-              stroke="#b32424" 
-              stroke-width="6" 
-              stroke-linecap="round" 
+              stroke="#b32424"               
+              stroke-width="3"               /* 6 -> 3으로 줄여서 더 얇게 */
+              stroke-linecap="butt"          /* 잉크 펜 느낌 */
               stroke-linejoin="round" 
-              stroke-dasharray="10, 12" 
+              stroke-dasharray="10, 12"      /* 촘촘하게 */
               vector-effect="non-scaling-stroke" />
       </svg>
       <div id="mapNodesContainer"></div>
