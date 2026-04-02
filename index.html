@@ -214,6 +214,16 @@
     .alert-msg { font-size: 14px; font-weight: bold; margin-bottom: 15px; word-break: keep-all; line-height: 1.4; }
 
     #loadingOverlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; display:none; justify-content:center; align-items:center; color:white; font-size:18px; font-weight:bold; flex-direction:column; }
+  
+  /* ✨ 토스트 메시지 스타일 */
+    #toastMessage {
+      position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.75); color: #fff; padding: 10px 20px; border-radius: 20px;
+      font-size: 13px; font-weight: bold; z-index: 10000;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease-in-out;
+      white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    #toastMessage.show { opacity: 1; bottom: 90px; }
   </style>
 </head>
 <body>
@@ -222,6 +232,7 @@
     <div id="loadingOverlay">
       <div>데이터 동기화 중... ⏳</div>
       <div style="font-size:12px; margin-top:10px; color:#aaa;">(서버와 통신하고 있습니다)</div>
+      <div id="toastMessage">통신 중이다냥! 잠시 기다리라냥! 🐾</div>
     </div>
 
     <div class="header">
@@ -413,10 +424,21 @@
       bosses: [], logs: []
     };
 
-    let currentCalDate = new Date(); 
+let currentCalDate = new Date(); 
     
     // ✨ 지출 삭제용 인덱스 보관
     let logToDeleteIndex = -1;
+
+    // ✨ 1. 통신 상태를 확인하는 자물쇠 변수 추가
+    let isCommunicating = false; 
+
+    // ✨ 2. 토스트 띄우기 함수 추가
+    function showToast(msg) {
+      const toast = document.getElementById('toastMessage');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000); // 2초 뒤 스르륵 사라짐
+    }
 
     const mapCoordinates = [
       { x: 10, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 30 }, { x: 50, y: 30 }, 
@@ -756,15 +778,28 @@ const monsterDic = [
       return diff === 0 ? "D-DAY" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
     }
 
+    // ✨ 3. 기존 saveState() 함수를 이걸로 통째로 덮어쓰기 (자물쇠 걸기/풀기)
     function saveState() {
       localStorage.setItem('rpg_defense_state', JSON.stringify(state)); 
+      
+      isCommunicating = true; // 🔒 통신 시작! 자물쇠 채움
+
       fetch(GAS_URL, {
         method: 'POST', redirect: 'follow', 
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(state)
-      }).catch(err => { console.error("서버 데이터 동기화 에러"); });
+      })
+      .then(response => {
+        isCommunicating = false; // 🔓 통신 성공! 자물쇠 풂
+      })
+      .catch(err => { 
+        isCommunicating = false; // 🔓 에러 나도 일단 자물쇠 풂
+        console.error("서버 데이터 동기화 에러"); 
+      });
     }
 
     function addBoss() {
+      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
+      if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const nameInput = document.getElementById('newBossName').value.trim();
       const hpInput = parseInt(document.getElementById('newBossHp').value);
       const dateInput = document.getElementById('newBossDate').value;
@@ -798,6 +833,8 @@ const monsterDic = [
     }
 
     function saveEditBoss() {
+      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
+      if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const id = parseInt(document.getElementById('editBossId').value);
       const newName = document.getElementById('editBossName').value.trim();
       const newHp = parseInt(document.getElementById('editBossHp').value);
@@ -824,6 +861,8 @@ const monsterDic = [
     }
 
     function executeDeleteBoss() {
+      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
+      if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const id = parseInt(document.getElementById('deleteBossId').value);
       state.bosses = state.bosses.filter(b => b.id !== id);
       render(); saveState();
@@ -832,6 +871,8 @@ const monsterDic = [
     }
 
     function attackBoss() {
+      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
+      if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const amount = parseInt(document.getElementById('expenseAmount').value);
       const memo = document.getElementById('expenseMemo').value.trim() || "일반 공격";
       if (isNaN(amount) || amount <= 0) { showAlert("공격 금액을 정확히 입력하라냥!"); return; }
@@ -903,6 +944,8 @@ const monsterDic = [
 
     // ✨ 지출 기록 및 쪼개기 저장
     function saveLogEdit(index) {
+      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
+      if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const log = state.logs[index];
       const origAmount = log.amount;
       const origDate = log.date;
@@ -966,6 +1009,8 @@ const monsterDic = [
     }
 
     function executeDeleteLog() {
+      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
+      if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const log = state.logs[logToDeleteIndex];
       state.currentMana += log.amount; // 마나 100% 환불
       state.logs.splice(logToDeleteIndex, 1);
@@ -991,6 +1036,8 @@ const monsterDic = [
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     function saveSettings() {
+      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
+      if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const newMana = parseInt(document.getElementById('setEditMana').value);
       if(!isNaN(newMana)) state.currentMana = newMana;
       state.settings.resetDay = parseInt(document.getElementById('setResetDay').value);
