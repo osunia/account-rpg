@@ -1092,7 +1092,7 @@ let listHtml = state.bosses.map(b => {
           list.innerHTML += `
             <li class="log-accordion-item">
               <div class="log-item-header" onclick="toggleLogDetail(${l.originalIndex})">
-                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:65%;">${l.date.slice(5)} | ${l.memo}</span>
+                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:65%;">${formatDateString(l.date)} | ${l.memo}</span>
                 <span style="color:var(--point-red); flex-shrink:0;">-${l.amount.toLocaleString()}</span>
               </div>
               <div class="log-detail-panel" id="log-detail-${l.originalIndex}">
