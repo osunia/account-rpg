@@ -17,13 +17,10 @@
       --border-thick: 2px solid var(--black);
       --box-shadow: 3px 3px 0px var(--black);
     }
-    /* ✨ 모바일 터치 시 발생하는 푸른색 하이라이트 제거 */
     * {
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
     }
-
-    /* ✨ 맵과 몹들을 빠르게 터치할 때 드래그(선택)되는 현상 방지 */
     #app {
       user-select: none;
       -webkit-user-select: none;
@@ -60,149 +57,88 @@
     .progress-bg { width: 100%; height: 14px; background-color: #eee; border: var(--border-thick); box-shadow: 2px 2px 0 var(--black); border-radius: 12px; overflow: hidden; }
     .progress-bar { height: 100%; background: var(--point-yellow); width: 0%; transition: width 0.3s; border-right: var(--border-thick); }
 
-    .main-boss-area { padding: 8px 12px; flex-shrink: 0; z-index: 10; background: var(--bg-color); border-bottom: 2px dashed var(--black); }
-    .main-boss-card { padding: 8px 12px; background-color: var(--point-red); color: white; display: flex; justify-content: space-between; align-items: center; border: var(--border-thick); box-shadow: var(--box-shadow); border-radius: 12px; }
+    /* 메인 보스 & 드롭다운 리스트 스타일 */
+    .main-boss-area { padding: 8px 12px; flex-shrink: 0; z-index: 30; background: var(--bg-color); border-bottom: 2px dashed var(--black); }
+    .main-boss-card { 
+      padding: 8px 12px; background-color: var(--point-red); color: white; display: flex; justify-content: space-between; 
+      align-items: center; border: var(--border-thick); box-shadow: var(--box-shadow); border-radius: 12px; position: relative; z-index: 2;
+    }
     .main-boss-card h3 { margin: 0 0 3px 0; font-size: 16px; font-weight: 900; text-shadow: 1px 1px 0 var(--black); font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; }
     .main-boss-card p { margin: 0; font-size: 11px; font-weight: bold; }
     .main-boss-dday { font-size: 18px; font-weight: 900; text-shadow: 1px 1px 0 var(--black); }
 
-    .map-container {
-      flex: 1; position: relative; background-color: #66ab5e;
-      background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px;
-      overflow: hidden; 
-      cursor: pointer;
+    /* ✨ 일정 리스트 드롭다운 디자인 */
+    .boss-list-wrapper { margin: 0 8px; position: relative; z-index: 1; }
+    .boss-list-content {
+      background: #fff; max-height: 0; overflow-y: auto; transition: max-height 0.3s ease, padding 0.3s ease;
+      border-radius: 0 0 12px 12px; margin-top: -10px; padding: 0 12px;
     }
+    .boss-list-content.open {
+      max-height: 250px; padding: 20px 12px 10px 12px; border: var(--border-thick); border-top: none; box-shadow: 3px 3px 0px var(--black);
+    }
+    .boss-list-content::-webkit-scrollbar { width: 4px; }
+    .boss-list-content::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    
+    .boss-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #ccc; }
+    .boss-list-item:last-child { border-bottom: none; }
+    .boss-info-col { flex: 1; display: flex; flex-direction: column; gap: 3px; cursor: pointer; }
+    .boss-info-row { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: bold; }
+    .boss-date-text { font-size: 11px; color: var(--point-blue); font-weight: bold;}
+    .boss-action-col { display: flex; align-items: center; gap: 8px; }
+    .boss-hp-text { font-size: 13px; font-weight: 900; }
+    .boss-delete-btn { color: #aaa; background: none; border: none; font-size: 16px; cursor: pointer; padding: 5px; transition: 0.2s; }
+    .boss-delete-btn:active { color: var(--point-red); transform: scale(0.9); }
+
+    .map-container { flex: 1; position: relative; background-color: #66ab5e; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px; overflow: hidden; cursor: pointer; z-index: 10;}
     .map-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
     
     .summon-btn { position: absolute; bottom: 12px; left: 12px; z-index: 20; padding: 6px 10px; font-size: 13px; background: #fff; border: var(--border-thick); box-shadow: var(--box-shadow); border-radius: 12px; font-weight: bold; cursor: pointer; color: var(--point-blue); }
     .summon-btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 var(--black); }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-5px); }
-    }
-    @keyframes floatHero {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-7px); }
-    }
+    @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+    @keyframes floatHero { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-7px); } }
 
-    .emoji-img {
-      object-fit: contain;
-      filter: drop-shadow(2px 2px 0px var(--black)); 
-      transition: all 0.1s;
-    }
+    .emoji-img { object-fit: contain; filter: drop-shadow(2px 2px 0px var(--black)); transition: all 0.1s; }
 
-.hero-node {
-      position: absolute;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-left: -30px; margin-top: -35px;
-      animation: floatHero 2s ease-in-out infinite;
-      /* ✨ 수정: 고양이를 클릭할 수 있도록 변경 */
-      pointer-events: auto; 
-      cursor: pointer;
+    .hero-node {
+      position: absolute; z-index: 100; display: flex; align-items: center; justify-content: center;
+      margin-left: -30px; margin-top: -35px; animation: floatHero 2s ease-in-out infinite;
+      pointer-events: auto; cursor: pointer;
     }
+    .hero-node .speech-bubble { bottom: auto; top: 85%; }
+    .hero-node .speech-bubble::after { top: auto; bottom: 100%; border-color: transparent transparent var(--black) transparent; }
 
-    /* ✨ 용사 전용 말풍선 위치 (항상 아래로) */
-    .hero-node .speech-bubble {
-      bottom: auto; 
-      top: 85%;
-    }
-    .hero-node .speech-bubble::after {
-      top: auto; 
-      bottom: 100%; 
-      border-color: transparent transparent var(--black) transparent;
-    }
+    .hero-emoji { width: 55px; height: 55px; filter: drop-shadow(3px 3px 0px var(--black)); }
+    .hero-weapon { width: 30px !important; height: 30px !important; position: absolute; right: -15px; bottom: 5px; z-index: -1; transform: scale(-1, -1) rotate(10deg) !important; filter: drop-shadow(-2px -2px 0px var(--black)) !important; animation: none !important; }
 
-    .hero-emoji {
-      width: 55px; height: 55px;
-      filter: drop-shadow(3px 3px 0px var(--black)); 
-    }
-
-    .hero-weapon {
-      width: 30px !important; height: 30px !important; 
-      position: absolute;
-      right: -15px; bottom: 5px; 
-      z-index: -1;
-      transform: scale(-1, -1) rotate(10deg) !important; 
-      filter: drop-shadow(-2px -2px 0px var(--black)) !important;
-      animation: none !important; 
-    }
-
-    .map-node {
-      position: absolute; 
-      margin-left: -20px; margin-top: -20px;
-      display: flex; justify-content: center; align-items: center;
-      cursor: pointer; z-index: 10;
-      transition: transform 0.1s;
-      font-size: 40px; 
-    }
-
-    .node-emoji {
-      width: 45px; height: 45px;
-      animation: float 2.5s ease-in-out infinite; 
-    }
-
+    .map-node { position: absolute; margin-left: -20px; margin-top: -20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; transition: transform 0.1s; font-size: 40px; }
+    .node-emoji { width: 45px; height: 45px; animation: float 2.5s ease-in-out infinite; }
     .map-node:nth-child(even) .node-emoji { animation-delay: -0.7s; }
     .map-node:nth-child(3n) .node-emoji { animation-delay: -1.4s; }
-
     .map-node:active { transform: scale(0.9); }
     .map-node.active { z-index: 50; }
 
-    .boss-card-emoji { 
-      width: 22px; height: 22px; 
-      vertical-align: middle; 
-      margin-right: 5px; 
-      filter: drop-shadow(1px 1px 0 var(--black)); 
-    }
+    .boss-card-emoji { width: 22px; height: 22px; vertical-align: middle; margin-right: 5px; filter: drop-shadow(1px 1px 0 var(--black)); }
 
     .speech-bubble {
       position: absolute; bottom: 85%; left: 50%; transform: translateX(-50%);
       background: #fff; border: var(--border-thick); padding: 5px 10px; border-radius: 8px;
-      font-family: 'Pretendard', 'Arial', sans-serif;
-      font-size: 11px; font-weight: bold; white-space: nowrap; color: var(--black);
-      box-shadow: 2px 2px 0 var(--black); display: none; z-index: 60; text-align: center;
-      pointer-events: none; 
+      font-family: 'Pretendard', 'Arial', sans-serif; font-size: 11px; font-weight: bold; white-space: nowrap; color: var(--black);
+      box-shadow: 2px 2px 0 var(--black); display: none; z-index: 60; text-align: center; pointer-events: none; 
     }
-    
-    .speech-bubble::after { 
-      content: ''; position: absolute; top: 100%; left: 50%; margin-left: -4px;
-      border-width: 4px; border-style: solid; border-color: var(--black) transparent transparent transparent;
-    }
-    .speech-bubble.flip-down {
-      bottom: auto; top: 80%;
-    }
-    .speech-bubble.flip-down::after {
-      top: auto; bottom: 100%; border-color: transparent transparent var(--black) transparent;
-    }
+    .speech-bubble::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -4px; border-width: 4px; border-style: solid; border-color: var(--black) transparent transparent transparent; }
+    .speech-bubble.flip-down { bottom: auto; top: 80%; }
+    .speech-bubble.flip-down::after { top: auto; bottom: 100%; border-color: transparent transparent var(--black) transparent; }
     .map-node.active .speech-bubble { display: block; }
 
-    .input-area {
-      padding: 12px; background: #fff; border-top: var(--border-thick);
-      display: flex; flex-direction: column; gap: 8px; z-index: 20; flex-shrink: 0;
-      border-radius: 12px 12px 0 0; 
-      margin-top: -10px; 
-    }
-    .input-area input {
-      padding: 10px; font-size: 14px; font-weight: bold; border: var(--border-thick); border-radius: 8px;
-      box-shadow: inset 2px 2px 0 rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;
-    }
+    .input-area { padding: 12px; background: #fff; border-top: var(--border-thick); display: flex; flex-direction: column; gap: 8px; z-index: 20; flex-shrink: 0; border-radius: 12px 12px 0 0; margin-top: -10px; }
+    .input-area input { padding: 10px; font-size: 14px; font-weight: bold; border: var(--border-thick); border-radius: 8px; box-shadow: inset 2px 2px 0 rgba(0,0,0,0.05); width: 100%; box-sizing: border-box; }
     .input-row { display: flex; gap: 8px; }
     #expenseAmount { text-align: right; }
     .attack-btn { flex: 0 0 90px; background-color: var(--point-red); color: white; font-size: 16px; border-radius: 8px; }
 
-    .modal-overlay {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7); z-index: 900; display: none;
-      justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
-    }
-    .modal-content {
-      background: var(--bg-color); width: 100%; max-height: 85vh;
-      border: var(--border-thick); box-shadow: var(--box-shadow); padding: 15px; border-radius: 16px;
-      overflow-y: auto;
-    }
+    .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 900; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+    .modal-content { background: var(--bg-color); width: 100%; max-height: 85vh; border: var(--border-thick); box-shadow: var(--box-shadow); padding: 15px; border-radius: 16px; overflow-y: auto; }
     .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 2px solid var(--black); padding-bottom: 10px; }
     .modal-header h2 { margin: 0; font-size: 18px; font-weight: 900; }
     .modal-close { background: none; border: none; font-size: 20px; font-weight: bold; cursor: pointer; color: var(--black); }
@@ -230,12 +166,7 @@
     .alert-box { text-align: center; padding: 15px; max-width: 250px; margin: 0 auto; border-radius: 16px; }
     .alert-msg { font-size: 14px; font-weight: bold; margin-bottom: 15px; word-break: keep-all; line-height: 1.4; }
 
-    #loadingOverlay {
-      position: absolute; top:0; left:0; width:100%; height:100%; 
-      background:rgba(0,0,0,0.8); z-index:10000; display:none; 
-      justify-content:center; align-items:center; color:white; 
-      font-size:18px; font-weight:bold; flex-direction:column;
-    }
+    #loadingOverlay { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; display:none; justify-content:center; align-items:center; color:white; font-size:18px; font-weight:bold; flex-direction:column; }
   </style>
 </head>
 <body>
@@ -261,12 +192,7 @@
     <div class="map-container">
       <button class="summon-btn cartoon-btn" onclick="openModal('summonModal')">소환!</button>
       <svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <path id="mapPath" d="" fill="none" stroke="#fae9a5" 
-              stroke-width="15" 
-              stroke-linecap="round" 
-              stroke-linejoin="round" 
-              stroke-dasharray="30, 25" 
-              vector-effect="non-scaling-stroke" />
+        <path id="mapPath" d="" fill="none" stroke="#fae9a5" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="30, 25" vector-effect="non-scaling-stroke" />
       </svg>
       <div id="mapNodesContainer"></div>
     </div>
@@ -282,7 +208,7 @@
     <div id="summonModal" class="modal-overlay">
       <div class="modal-content cartoon-btn" style="cursor: default;">
         <div class="modal-header">
-          <h2>몬스터 소환</h2>
+          <h2>😈 몬스터 소환</h2>
           <button class="modal-close" onclick="closeModal('summonModal')">×</button>
         </div>
         <div class="form-group">
@@ -298,6 +224,29 @@
           <input type="date" id="newBossDate">
         </div>
         <button class="cartoon-btn save-btn" style="background-color: var(--point-red);" onclick="addBoss()">소환하기 ⚡</button>
+      </div>
+    </div>
+
+    <div id="editBossModal" class="modal-overlay">
+      <div class="modal-content cartoon-btn" style="cursor: default;">
+        <div class="modal-header">
+          <h2>🛠️ 몬스터 정보 수정</h2>
+          <button class="modal-close" onclick="closeModal('editBossModal')">×</button>
+        </div>
+        <input type="hidden" id="editBossId">
+        <div class="form-group">
+          <label>이벤트 이름 <span style="font-size:10px; color:#666;">(몬스터 종족명은 유지됩니다)</span></label>
+          <input type="text" id="editBossName" placeholder="일정 이름을 수정하세요">
+        </div>
+        <div class="form-group">
+          <label>필요 금액 (HP)</label>
+          <input type="number" id="editBossHp">
+        </div>
+        <div class="form-group">
+          <label>출현 날짜 (D-Day)</label>
+          <input type="date" id="editBossDate">
+        </div>
+        <button class="cartoon-btn save-btn" onclick="saveEditBoss()">수정 완료 ✨</button>
       </div>
     </div>
 
@@ -361,8 +310,6 @@
   </div>
 
   <script>
-/* 💡 JS 로직: Git + GAS 분리형 API 연동 (Local-First & 정교한 맵 배치) */
-
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzEq8GmgpYUbqcgPmigVcgoCFcdqEPY_NaDjYe08wkUU1yPn1iRyQoEat2_FTMqtRNm/exec";
 
     let state = {
@@ -382,37 +329,24 @@
     const MS_EMOJI_BASE = "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/";
     
     const monsterDic = [
-      { name: "유령", emoji: "👻", img: "Ghost/3D/ghost_3d.png" }, 
-      { name: "외계인", emoji: "👾", img: "Alien%20monster/3D/alien_monster_3d.png" }, 
-      { name: "로봇", emoji: "🤖", img: "Robot/3D/robot_3d.png" },
-      { name: "피자", emoji: "🍕", img: "Pizza/3D/pizza_3d.png" }, 
-      { name: "케이크", emoji: "🍰", img: "Shortcake/3D/shortcake_3d.png" }, 
-      { name: "늑대", emoji: "🐺", img: "Wolf/3D/wolf_3d.png" },
-      { name: "악어", emoji: "🐊", img: "Crocodile/3D/crocodile_3d.png" }, 
-      { name: "해파리", emoji: "🪼", img: "Jellyfish/3D/jellyfish_3d.png" }, 
-      { name: "잭오랜턴", emoji: "🎃", img: "Jack-o-lantern/3D/jack-o-lantern_3d.png" }, 
-      { name: "마왕", emoji: "👑", img: "Crown/3D/crown_3d.png" }, 
-      { name: "골렘", emoji: "🪨", img: "Rock/3D/rock_3d.png" }, 
-      { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" },
-      { name: "단검", emoji: "🗡️", img: "Dagger/3D/dagger_3d.png" },
-      { name: "피냐타", emoji: "🪅", img: "Piñata/3D/piñata_3d.png" },
-      { name: "타코", emoji: "🌮", img: "Taco/3D/taco_3d.png" },
-      { name: "주먹밥", emoji: "🍙", img: "Rice%20ball/3D/rice_ball_3d.png" },
-      { name: "선인장", emoji: "🌵", img: "Cactus/3D/cactus_3d.png" },
-      { name: "눈사람", emoji: "⛄", img: "Snowman%20without%20snow/3D/snowman_without_snow_3d.png" }
+      { name: "유령", emoji: "👻", img: "Ghost/3D/ghost_3d.png" }, { name: "외계인", emoji: "👾", img: "Alien%20monster/3D/alien_monster_3d.png" }, 
+      { name: "로봇", emoji: "🤖", img: "Robot/3D/robot_3d.png" }, { name: "피자", emoji: "🍕", img: "Pizza/3D/pizza_3d.png" }, 
+      { name: "케이크", emoji: "🍰", img: "Shortcake/3D/shortcake_3d.png" }, { name: "늑대", emoji: "🐺", img: "Wolf/3D/wolf_3d.png" },
+      { name: "악어", emoji: "🐊", img: "Crocodile/3D/crocodile_3d.png" }, { name: "해파리", emoji: "🪼", img: "Jellyfish/3D/jellyfish_3d.png" }, 
+      { name: "잭오랜턴", emoji: "🎃", img: "Jack-o-lantern/3D/jack-o-lantern_3d.png" }, { name: "마왕", emoji: "👑", img: "Crown/3D/crown_3d.png" }, 
+      { name: "골렘", emoji: "🪨", img: "Rock/3D/rock_3d.png" }, { name: "아보카도", emoji: "🥑", img: "Avocado/3D/avocado_3d.png" },
+      { name: "단검", emoji: "🗡️", img: "Dagger/3D/dagger_3d.png" }, { name: "피냐타", emoji: "🪅", img: "Piñata/3D/piñata_3d.png" },
+      { name: "타코", emoji: "🌮", img: "Taco/3D/taco_3d.png" }, { name: "주먹밥", emoji: "🍙", img: "Rice%20ball/3D/rice_ball_3d.png" },
+      { name: "선인장", emoji: "🌵", img: "Cactus/3D/cactus_3d.png" }, { name: "눈사람", emoji: "⛄", img: "Snowman%20without%20snow/3D/snowman_without_snow_3d.png" }
     ];
 
-    // ✨ 용사 고양이의 랜덤 대사 리스트 (총 45개)
     const heroQuotes = [
-      // 소비 관련
       "살까 말까 할 때는 사지 마라냥.", "지금 사는 그 물건 정말 필요한 거냐냥?", "지름신은 용사의 최대 적이다냥.", "영수증은 배신의 증거다냥.", "과소비는 보스보다 무섭다냥.", 
       "충동구매는 패배의 지름길이다냥.", "장바구니를 비우면 마음이 가벼워진다냥.", "외식보다는 집밥이 최고다냥.", "세일이라고 다 싼 게 아니다냥.", "필요 없는 물건은 공짜라도 비싸다냥.",
       "광고에 속지 마라냥.", "내일의 나에게 빚을 지지 마라냥.", "카드 긁는 소리에 심장이 아프다냥.", "물욕을 버리면 예산이 남는다냥.", "소비는 한순간이지만 후회는 길다냥.",
-      // 저축 관련
       "티끌 모아 태산이다냥.", "푼돈이 목돈 된다냥.", "통장 잔고가 용사의 체력이다냥.", "적금은 든든한 갑옷이다냥.", "동전 한 개도 소중히 여겨라냥.", 
       "저축은 미래를 위한 마나 충전이다냥.", "먼저 저축하고 남은 돈을 써라냥.", "부자가 되는 가장 빠른 길은 안 쓰는 거다냥.", "통장에 숫자가 늘어날 때가 제일 행복하다냥.", "비상금은 최후의 보루다냥.",
       "복리의 마법을 믿어보라냥.", "작은 습관이 큰 부자를 만든다냥.", "저축은 배신하지 않는다냥.", "지갑을 닫으면 미래가 열린다냥.", "오늘 아낀 커피 한 잔이 미래의 연어캔이다냥.",
-      // 절약/응원 관련
       "아껴야 잘 산다냥.", "낭비는 악이다냥.", "검소함은 용사의 덕목이다냥.", "오늘도 잘 참았다냥.", "예산을 지키는 네가 진정한 승자다냥.", 
       "포기하지 말고 끝까지 방어해라냥.", "조금만 더 버티면 보너스 마나가 들어온다냥.", "절약은 궁색한 게 아니라 똑똑한 거다냥.", "가계부를 쓰는 손길이 아름답다냥.", "네 통장은 내가 지킨다냥.",
       "할 수 있다냥.", "함께 예산 왕국을 지키자냥.", "너의 절제력을 믿는다냥.", "오늘도 한 걸음 성장했다냥.", "최고의 디펜스는 안 쓰는 거다냥."
@@ -421,18 +355,13 @@
     function getEmojiImage(emojiStr, type = "node") {
       const found = monsterDic.find(m => m.emoji === emojiStr);
       let imgPath = found ? found.img : null;
-      
-      if (!imgPath && emojiStr === "😺") {
-        imgPath = "Grinning%20cat/3D/grinning_cat_3d.png"; 
-      }
-      
+      if (!imgPath && emojiStr === "😺") imgPath = "Grinning%20cat/3D/grinning_cat_3d.png"; 
       if (imgPath) {
         let className = "emoji-img";
         if (type === "boss") className += " boss-card-emoji";
         else if (type === "weapon") className += " hero-weapon";
         else if (emojiStr === "😺") className += " hero-emoji";
         else className += " node-emoji monster-emoji";
-
         return `<img src="${MS_EMOJI_BASE}${imgPath}" class="${className}" alt="${emojiStr}" onerror="this.outerHTML='${emojiStr}'">`;
       }
       return emojiStr; 
@@ -440,12 +369,10 @@
 
     function getTodayDateString() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
     function getMonthString() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
-    
     function showLoading() { document.getElementById('loadingOverlay').style.display = 'flex'; }
     function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
     function showAlert(msg) { document.getElementById('alertMessage').innerHTML = msg; document.getElementById('customAlert').style.display = 'flex'; }
 
-    // ✨ 타임존 & 날짜 에러 완벽 차단용 헬퍼 함수
     function parseDateToNoon(dStr) {
       if (!dStr) return new Date();
       const cleanDate = String(dStr).substring(0, 10);
@@ -453,10 +380,23 @@
       return new Date(p[0], p[1]-1, p[2], 12, 0, 0);
     }
 
+    // ✨ 일정 이름에서 몬스터 종족명 분리 (수정할 때 사용)
+    function extractEventName(fullName, emoji) {
+      const found = monsterDic.find(m => m.emoji === emoji);
+      if(found && fullName.endsWith(" " + found.name)) {
+        return fullName.substring(0, fullName.length - found.name.length - 1);
+      }
+      return fullName; 
+    }
+
+    function toggleBossList() {
+      const content = document.getElementById('bossListContent');
+      if(content) content.classList.toggle('open');
+    }
+
     function render() {
       document.getElementById('manaDisplay').innerText = `${state.currentMana.toLocaleString()} 원`;
       if(!state.bosses) state.bosses = [];
-      
       state.bosses.sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate));
       
       const mainBossArea = document.getElementById('mainBossArea');
@@ -474,16 +414,44 @@
       let percent = (state.currentMana / mainBoss.hp) * 100;
       document.getElementById('manaBar').style.width = `${Math.min(percent, 100)}%`;
 
-      mainBossArea.innerHTML = `
-        <div class="main-boss-card">
-          <div>
-            <h3 style="display:flex; align-items:center;">
-              ${getEmojiImage(mainBoss.emoji, "boss")} ${mainBoss.name}
-            </h3>
-            <p>필요 예산: ${mainBoss.hp.toLocaleString()} 원</p>
+      // ✨ 상단 영역: 메인 카드 + 숨겨진 드롭다운 리스트 HTML
+      let listHtml = state.bosses.map(b => `
+        <div class="boss-list-item">
+          <div class="boss-info-col" onclick="openEditModal(${b.id})">
+            <div class="boss-info-row">
+              ${getEmojiImage(b.emoji, "boss")} 
+              <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 140px;">${b.name}</span>
+            </div>
+            <div class="boss-date-text">${b.targetDate} (${calculateDday(b.targetDate)})</div>
           </div>
-          <div class="main-boss-dday">${calculateDday(mainBoss.targetDate)}</div>
-        </div>`;
+          <div class="boss-action-col">
+            <span class="boss-hp-text">${b.hp.toLocaleString()}원</span>
+            <button class="boss-delete-btn" onclick="deleteBoss(${b.id}, event)">✖</button>
+          </div>
+        </div>
+      `).join('');
+
+      mainBossArea.innerHTML = `
+        <div style="position: relative; z-index: 20;">
+          <div class="main-boss-card" onclick="toggleBossList()" style="cursor: pointer;">
+            <div>
+              <h3 style="display:flex; align-items:center;">
+                ${getEmojiImage(mainBoss.emoji, "boss")} ${mainBoss.name}
+              </h3>
+              <p>필요 예산: ${mainBoss.hp.toLocaleString()} 원</p>
+            </div>
+            <div style="text-align:right;">
+              <div class="main-boss-dday">${calculateDday(mainBoss.targetDate)}</div>
+              <div style="font-size: 10px; color: rgba(255,255,255,0.9); margin-top:2px; font-weight:normal;">전체일정 ▼</div>
+            </div>
+          </div>
+          <div class="boss-list-wrapper">
+            <div class="boss-list-content" id="bossListContent">
+              ${listHtml}
+            </div>
+          </div>
+        </div>
+      `;
 
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
       
@@ -511,7 +479,6 @@
 
       const todayObj = parseDateToNoon(getTodayDateString());
       const allBosses = state.bosses;
-      
       const HORIZON_DAYS = 30; 
       const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.85); 
       const assignedRatios = []; 
@@ -519,7 +486,6 @@
       allBosses.forEach((boss) => {
         const targetObj = parseDateToNoon(boss.targetDate);
         let diffDays = Math.max(0, Math.round((targetObj - todayObj) / 86400000));
-        
         let scaledDays = Math.pow(diffDays, 0.85); 
         let ratio = Math.min(1, scaledDays / maxScaledHorizon);
         
@@ -531,7 +497,6 @@
         assignedRatios.push(ratio);
 
         let targetDist = totalPathLength * (0.03 + (ratio * 0.97));
-        
         let posX = mapCoordinates[mapCoordinates.length - 1].x;
         let posY = mapCoordinates[mapCoordinates.length - 1].y;
 
@@ -552,7 +517,6 @@
       });
     }
 
-    // ✨ 수정: 몹(map-node) 뿐만 아니라 고양이(hero-node)의 말풍선도 닫도록 강화
     function closeAllBubbles() {
       document.querySelectorAll('.map-node, .hero-node').forEach(n => {
         n.classList.remove('active');
@@ -567,46 +531,39 @@
       });
     }
 
-    // ✨ 수정: 바탕화면 클릭 시 몹이나 고양이가 아니면 말풍선 닫기
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.map-node') && !e.target.closest('.hero-node')) {
         closeAllBubbles();
       }
     });
 
-    // ✨ 용사 고양이 전용 랜덤 멘트 및 위치 보정 함수
+    // ✨ 용사 말풍선 강제 갱신 및 화면 밖 벗어남 방지 (Absolute Left/Right 적용)
     function toggleHeroBubble(element, event) {
       event.stopPropagation();
-      
-      // 누를 때마다 무조건 멘트가 바뀌어야 하므로 우선 다 닫습니다.
-      closeAllBubbles();
-
-      // 고양이 말풍선을 강제로 활성화
-      element.classList.add('active');
       const randomQuote = heroQuotes[Math.floor(Math.random() * heroQuotes.length)];
       const bubble = element.querySelector('.speech-bubble');
       
-      // 혹시 틀어져 있을 수 있는 기본 위치 중앙 정렬
+      closeAllBubbles(); 
+      element.classList.add('active');
+      bubble.style.display = 'block';
+      bubble.innerText = randomQuote;
+      
       bubble.style.left = '50%'; 
       bubble.style.right = 'auto';
       bubble.style.transform = 'translateX(-50%)';
       
-      bubble.innerText = randomQuote;
-      bubble.style.display = 'block';
-      
-      // ✨ 수정: 몹과 동일하게 화면 양끝으로 나가지 않도록 벽 감지 및 이동 로직 추가!
       setTimeout(() => {
         const rect = bubble.getBoundingClientRect();
         const mapRect = document.querySelector('.map-container').getBoundingClientRect();
-
+        // 화면 가장자리를 넘어가면 transform을 풀고 절대 여백(10px) 부여
         if (rect.left < mapRect.left + 10) {
-          bubble.style.left = '0'; 
-          bubble.style.transform = 'translateX(10%)';
+          bubble.style.left = '10px'; 
+          bubble.style.transform = 'none';
         } 
         else if (rect.right > mapRect.right - 10) {
           bubble.style.left = 'auto'; 
-          bubble.style.right = '0'; 
-          bubble.style.transform = 'translateX(-10%)';
+          bubble.style.right = '10px'; 
+          bubble.style.transform = 'none';
         }
       }, 10);
     }
@@ -614,7 +571,6 @@
     function toggleBubble(element, event) {
       event.stopPropagation(); 
       const isActive = element.classList.contains('active');
-      
       closeAllBubbles();
 
       if(!isActive) {
@@ -625,17 +581,15 @@
         setTimeout(() => {
           const rect = bubble.getBoundingClientRect();
           const mapRect = document.querySelector('.map-container').getBoundingClientRect();
-
           if (rect.left < mapRect.left + 10) {
-            bubble.style.left = '0'; 
-            bubble.style.transform = 'translateX(10%)';
+            bubble.style.left = '10px'; 
+            bubble.style.transform = 'none';
           } 
           else if (rect.right > mapRect.right - 10) {
             bubble.style.left = 'auto'; 
-            bubble.style.right = '0'; 
-            bubble.style.transform = 'translateX(-10%)';
+            bubble.style.right = '10px'; 
+            bubble.style.transform = 'none';
           }
-          
           if (rect.top < mapRect.top + 50) {
             bubble.classList.add('flip-down');
           }
@@ -652,16 +606,10 @@
 
     function saveState() {
       localStorage.setItem('rpg_defense_state', JSON.stringify(state)); 
-
       fetch(GAS_URL, {
-        method: 'POST',
-        redirect: 'follow', 
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(state)
-      })
-      .then(response => response.json())
-      .then(result => { /* 백그라운드 조용히 성공 */ })
-      .catch(err => { showAlert("데이터 저장 실패! 인터넷 연결을 확인하세요. 🐛"); });
+        method: 'POST', redirect: 'follow', 
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(state)
+      }).catch(err => { console.error("서버 데이터 동기화 에러"); });
     }
 
     function addBoss() {
@@ -671,13 +619,9 @@
       if (!nameInput || isNaN(hpInput) || hpInput <= 0 || !dateInput) { showAlert("정보를 정확히 입력해주세요! 🐛"); return; }
 
       if(!state.bosses) state.bosses = [];
-
       const usedEmojis = state.bosses.map(b => b.emoji);
       let availableMonsters = monsterDic.filter(m => !usedEmojis.includes(m.emoji) && m.emoji !== "🗡️");
-
-      if (availableMonsters.length === 0) {
-        availableMonsters = monsterDic.filter(m => m.emoji !== "🗡️");
-      }
+      if (availableMonsters.length === 0) availableMonsters = monsterDic.filter(m => m.emoji !== "🗡️");
 
       const randomMonster = availableMonsters[Math.floor(Math.random() * availableMonsters.length)];
       const finalName = `${nameInput} ${randomMonster.name}`; 
@@ -685,9 +629,50 @@
       state.bosses.push({ id: Date.now(), name: finalName, hp: hpInput, targetDate: dateInput, emoji: randomMonster.emoji });
       
       document.getElementById('newBossName').value = ''; document.getElementById('newBossHp').value = ''; document.getElementById('newBossDate').value = '';
-      
       render(); saveState(); closeModal('summonModal'); 
       showAlert(`새로운 몬스터 [${finalName}] 소환 완료! 😈`);
+    }
+
+    // ✨ 보스(일정) 수정 및 삭제 함수
+    function openEditModal(id) {
+      const boss = state.bosses.find(b => b.id === id);
+      if(!boss) return;
+      
+      document.getElementById('editBossId').value = boss.id;
+      document.getElementById('editBossName').value = extractEventName(boss.name, boss.emoji);
+      document.getElementById('editBossHp').value = boss.hp;
+      document.getElementById('editBossDate').value = boss.targetDate;
+      
+      openModal('editBossModal');
+    }
+
+    function saveEditBoss() {
+      const id = parseInt(document.getElementById('editBossId').value);
+      const newName = document.getElementById('editBossName').value.trim();
+      const newHp = parseInt(document.getElementById('editBossHp').value);
+      const newDate = document.getElementById('editBossDate').value;
+      
+      if (!newName || isNaN(newHp) || newHp <= 0 || !newDate) { showAlert("정보를 정확히 입력해주세요! 🐛"); return; }
+
+      const bossIndex = state.bosses.findIndex(b => b.id === id);
+      if(bossIndex > -1) {
+        const boss = state.bosses[bossIndex];
+        const monster = monsterDic.find(m => m.emoji === boss.emoji);
+        const finalName = monster ? `${newName} ${monster.name}` : newName;
+        
+        state.bosses[bossIndex] = { ...boss, name: finalName, hp: newHp, targetDate: newDate };
+        render(); saveState(); closeModal('editBossModal');
+        showAlert("일정이 수정되었습니다! ✨");
+      }
+    }
+
+    function deleteBoss(id, event) {
+      event.stopPropagation(); // 모달이 안 열리게 막음
+      if(confirm("정말 이 일정을 삭제하시겠습니까냥? 😿")) {
+        state.bosses = state.bosses.filter(b => b.id !== id);
+        render(); saveState();
+        showAlert("일정이 성공적으로 삭제되었습니다! 🗑️");
+      }
     }
 
     function attackBoss() {
@@ -700,7 +685,6 @@
       state.logs.push({ date: getTodayDateString(), amount: amount, memo: memo });
       
       document.getElementById('expenseAmount').value = ''; document.getElementById('expenseMemo').value = '';
-      
       render(); saveState(); 
       showAlert(`🗡️ ${amount.toLocaleString()} 데미지 적중!`);
     }
@@ -793,7 +777,6 @@
             if (state.syncMessages && state.syncMessages.length > 0) {
               showAlert(state.syncMessages.join("<br>"));
             }
-            
             if (prevStateStr !== JSON.stringify(state) || !hasLocalData) {
               render(); 
             }
@@ -810,9 +793,7 @@
     }
 
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        init(); 
-      }
+      if (document.visibilityState === 'visible') init(); 
     });
 
     init();
