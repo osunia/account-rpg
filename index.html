@@ -734,7 +734,7 @@
     function attackBoss() {
       const amount = parseInt(document.getElementById('expenseAmount').value);
       const memo = document.getElementById('expenseMemo').value.trim() || "일반 공격";
-      if (isNaN(amount) || amount <= 0) { showAlert("공격 금액을 정확 입력해라냥!"); return; }
+      if (isNaN(amount) || amount <= 0) { showAlert("공격 금액을 정확히 입력해라냥!"); return; }
 
       state.currentMana -= amount;
       if(!state.logs) state.logs = [];
