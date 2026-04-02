@@ -57,7 +57,6 @@
     .progress-bg { width: 100%; height: 14px; background-color: #eee; border: var(--border-thick); box-shadow: 2px 2px 0 var(--black); border-radius: 12px; overflow: hidden; }
     .progress-bar { height: 100%; background: var(--point-yellow); width: 0%; transition: width 0.3s; border-right: var(--border-thick); }
 
-    /* 메인 보스 & 드롭다운 리스트 스타일 */
     .main-boss-area { padding: 8px 12px; flex-shrink: 0; z-index: 30; background: var(--bg-color); border-bottom: 2px dashed var(--black); }
     .main-boss-card { 
       padding: 8px 12px; background-color: var(--point-red); color: white; display: flex; justify-content: space-between; 
@@ -67,11 +66,10 @@
     .main-boss-card p { margin: 0; font-size: 11px; font-weight: bold; }
     .main-boss-dday { font-size: 18px; font-weight: 900; text-shadow: 1px 1px 0 var(--black); }
 
-    /* ✨ 수정: 일정 리스트 드롭다운 공중 부양! (position: absolute) */
     .boss-list-wrapper { 
       position: absolute; 
-      top: calc(100% - 15px); /* 카드 아래쪽으로 쏙 들어가게 */
-      left: 8px; right: 8px; /* 양옆 여백 */
+      top: calc(100% - 15px);
+      left: 8px; right: 8px;
       z-index: 1; 
     }
     .boss-list-content {
@@ -210,7 +208,7 @@
       </div>
     </div>
 
-    <div id="summonModal" class="modal-overlay">
+    <div id="summonModal" class="modal-overlay" onclick="if(event.target === this) closeModal('summonModal')">
       <div class="modal-content cartoon-btn" style="cursor: default;">
         <div class="modal-header">
           <h2>😈 몬스터 소환</h2>
@@ -232,7 +230,7 @@
       </div>
     </div>
 
-    <div id="editBossModal" class="modal-overlay">
+    <div id="editBossModal" class="modal-overlay" onclick="if(event.target === this) closeModal('editBossModal')">
       <div class="modal-content cartoon-btn" style="cursor: default;">
         <div class="modal-header">
           <h2>🛠️ 몬스터 정보 수정</h2>
@@ -266,7 +264,7 @@
       </div>
     </div>
 
-    <div id="settingsModal" class="modal-overlay">
+    <div id="settingsModal" class="modal-overlay" onclick="if(event.target === this) closeModal('settingsModal')">
       <div class="modal-content cartoon-btn" style="cursor: default;">
         <div class="modal-header">
           <h2>⚙️ 설정</h2>
@@ -293,7 +291,7 @@
       </div>
     </div>
 
-    <div id="logModal" class="modal-overlay">
+    <div id="logModal" class="modal-overlay" onclick="if(event.target === this) closeModal('logModal')">
       <div class="modal-content cartoon-btn" style="cursor: default;">
         <div class="modal-header">
           <h2>📜 전투 기록</h2>
@@ -317,7 +315,7 @@
       </div>
     </div>
 
-    <div id="customAlert" class="modal-overlay">
+    <div id="customAlert" class="modal-overlay" onclick="if(event.target === this) closeModal('customAlert')">
       <div class="modal-content cartoon-btn alert-box" style="cursor: default;">
         <div class="alert-msg" id="alertMessage">메시지</div>
         <button class="cartoon-btn" style="padding: 8px 30px; background: var(--point-yellow); border-radius: 8px;" onclick="closeModal('customAlert')">확인</button>
@@ -471,11 +469,14 @@
 
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
       
+      // ✨ 용사 고양이 말풍선 선행 계산 (10% 위치이므로 왼쪽 벽 보호)
+      let heroBubbleStyle = "left: 10px; right: auto; transform: none;";
+      
       mapNodesContainer.innerHTML += `
         <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;" onclick="toggleHeroBubble(this, event)">
           ${getEmojiImage("😺")}
           ${getEmojiImage("🗡️", "weapon")}
-          <div class="speech-bubble"></div> 
+          <div class="speech-bubble flip-down" style="${heroBubbleStyle}"></div> 
         </div>`;
 
       for(let i=1; i < mapCoordinates.length; i++) { 
@@ -525,26 +526,33 @@
           }
         }
 
+        // ✨ 몹 말풍선 선행 위치 계산!
+        let bubbleStyle = "left: 50%; right: auto; transform: translateX(-50%);";
+        if (posX < 20) {
+          bubbleStyle = "left: 10px; right: auto; transform: none;";
+        } else if (posX > 80) {
+          bubbleStyle = "left: auto; right: 10px; transform: none;";
+        }
+        
+        let bubbleClass = "speech-bubble";
+        if (posY < 25) {
+          bubbleClass += " flip-down";
+        }
+
         mapNodesContainer.innerHTML += `
           <div class="map-node" style="left: ${posX}%; top: ${posY}%;" onclick="toggleBubble(this, event)">
             <div class="node-emoji">${getEmojiImage(boss.emoji)}</div>
-            <div class="speech-bubble">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
+            <div class="${bubbleClass}" style="${bubbleStyle}">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
           </div>`;
       });
     }
 
+    // ✨ 깜빡임 제거의 일등공신! 위치 초기화 코드들을 전부 날려버렸습니다.
     function closeAllBubbles() {
       document.querySelectorAll('.map-node, .hero-node').forEach(n => {
         n.classList.remove('active');
         const b = n.querySelector('.speech-bubble');
-        if(b) {
-          b.style.display = 'none'; 
-          b.style.visibility = ''; // ✨ 스텔스 모드 해제
-          b.style.left = '50%'; 
-          b.style.right = 'auto';
-          b.style.transform = 'translateX(-50%)';
-          b.classList.remove('flip-down');
-        }
+        if(b) b.style.display = 'none'; 
       });
     }
 
@@ -554,6 +562,7 @@
       }
     });
 
+    // ✨ 이제 그저 글씨만 바꾸고 보여주기만 하면 끝입니다!
     function toggleHeroBubble(element, event) {
       event.stopPropagation();
       const randomQuote = heroQuotes[Math.floor(Math.random() * heroQuotes.length)];
@@ -562,31 +571,7 @@
       closeAllBubbles(); 
       element.classList.add('active');
       bubble.innerText = randomQuote;
-      
-      // ✨ 스텔스 측정 모드: 투명 상태로 켜기 (깜빡임 완벽 제거!)
-      bubble.style.visibility = 'hidden'; 
       bubble.style.display = 'block';
-      
-      bubble.style.left = '50%'; 
-      bubble.style.right = 'auto';
-      bubble.style.transform = 'translateX(-50%)';
-      
-      // ✨ setTimeout 없이 즉시 계산
-      const rect = bubble.getBoundingClientRect();
-      const mapRect = document.querySelector('.map-container').getBoundingClientRect();
-      
-      if (rect.left < mapRect.left + 10) {
-        bubble.style.left = '10px'; 
-        bubble.style.transform = 'none';
-      } 
-      else if (rect.right > mapRect.right - 10) {
-        bubble.style.left = 'auto'; 
-        bubble.style.right = '10px'; 
-        bubble.style.transform = 'none';
-      }
-      
-      // ✨ 위치 세팅 끝! 이제 눈에 보이게 변경
-      bubble.style.visibility = 'visible'; 
     }
     
     function toggleBubble(element, event) {
@@ -597,30 +582,7 @@
       if(!isActive) {
         element.classList.add('active');
         const bubble = element.querySelector('.speech-bubble');
-        
-        // ✨ 스텔스 측정 모드: 투명 상태로 켜기
-        bubble.style.visibility = 'hidden';
         bubble.style.display = 'block'; 
-        
-        // ✨ setTimeout 없이 즉시 계산
-        const rect = bubble.getBoundingClientRect();
-        const mapRect = document.querySelector('.map-container').getBoundingClientRect();
-        
-        if (rect.left < mapRect.left + 10) {
-          bubble.style.left = '10px'; 
-          bubble.style.transform = 'none';
-        } 
-        else if (rect.right > mapRect.right - 10) {
-          bubble.style.left = 'auto'; 
-          bubble.style.right = '10px'; 
-          bubble.style.transform = 'none';
-        }
-        if (rect.top < mapRect.top + 50) {
-          bubble.classList.add('flip-down');
-        }
-        
-        // ✨ 위치 세팅 끝! 이제 눈에 보이게 변경
-        bubble.style.visibility = 'visible';
       }
     }
 
