@@ -137,7 +137,6 @@
       pointer-events: auto; cursor: pointer;
     }
     .hero-node .speech-bubble { bottom: auto; top: 85%; }
-    .hero-node .speech-bubble::after { top: auto; bottom: 100%; border-color: transparent transparent var(--black) transparent; }
 
     .hero-emoji { width: 55px; height: 55px; filter: drop-shadow(3px 3px 0px var(--black)); }
     .hero-weapon { width: 30px !important; height: 30px !important; position: absolute; right: -15px; bottom: 5px; z-index: -1; transform: scale(-1, -1) rotate(10deg) !important; filter: drop-shadow(-2px -2px 0px var(--black)) !important; animation: none !important; }
@@ -157,9 +156,7 @@
       font-family: 'Pretendard', 'Arial', sans-serif; font-size: 11px; font-weight: bold; white-space: nowrap; color: var(--black);
       box-shadow: 2px 2px 0 var(--black); display: none; z-index: 60; text-align: center; pointer-events: none; 
     }
-    .speech-bubble::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -4px; border-width: 4px; border-style: solid; border-color: var(--black) transparent transparent transparent; }
     .speech-bubble.flip-down { bottom: auto; top: 80%; }
-    .speech-bubble.flip-down::after { top: auto; bottom: 100%; border-color: transparent transparent var(--black) transparent; }
     .map-node.active .speech-bubble { display: block; }
 
     .input-area { padding: 12px; background: #fff; border-top: var(--border-thick); display: flex; flex-direction: column; gap: 8px; z-index: 20; flex-shrink: 0; border-radius: 12px 12px 0 0; margin-top: -10px; }
