@@ -141,11 +141,18 @@
     .hero-emoji { width: 55px; height: 55px; filter: drop-shadow(3px 3px 0px var(--black)); }
     .hero-weapon { width: 30px !important; height: 30px !important; position: absolute; right: -15px; bottom: 5px; z-index: -1; transform: scale(-1, -1) rotate(10deg) !important; filter: drop-shadow(-2px -2px 0px var(--black)) !important; animation: none !important; }
 
-    .map-node { position: absolute; margin-left: -20px; margin-top: -20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; transition: transform 0.1s; font-size: 40px; }
-    .node-emoji { width: 45px; height: 45px; animation: float 2.5s ease-in-out infinite; }
-    .map-node:nth-child(even) .node-emoji { animation-delay: -0.7s; }
-    .map-node:nth-child(3n) .node-emoji { animation-delay: -1.4s; }
-    .map-node:active { transform: scale(0.9); }
+/* ✨ 1. 애니메이션을 아이콘이 아니라 컨테이너 전체(.map-node)로 옮깁니다! */
+    .map-node { position: absolute; margin-left: -20px; margin-top: -20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; font-size: 40px; animation: float 2.5s ease-in-out infinite; }
+    
+    /* ✨ 2. 아이콘 자체의 애니메이션은 빼고, 클릭 시 부드러운 축소를 위해 transition만 남깁니다 */
+    .node-emoji { width: 45px; height: 45px; transition: transform 0.1s; }
+    
+    /* ✨ 3. 불규칙하게 둥실거리는 딜레이도 컨테이너에 적용해줍니다 */
+    .map-node:nth-child(even) { animation-delay: -0.7s; }
+    .map-node:nth-child(3n) { animation-delay: -1.4s; }
+    
+    /* ✨ 4. 컨테이너를 누를 때 컨테이너 자체가 축소되면 애니메이션과 충돌하므로, 누를 땐 안쪽의 '아이콘'만 쏙 작아지게 합니다! */
+    .map-node:active .node-emoji { transform: scale(0.9); }
     .map-node.active { z-index: 50; }
 
     .boss-card-emoji { width: 22px; height: 22px; vertical-align: middle; margin-right: 5px; filter: drop-shadow(1px 1px 0 var(--black)); }
