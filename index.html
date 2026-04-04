@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#ffffff">
   <title>예산 디펜스 RPG</title>
-  
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap" rel="stylesheet">
   <link rel="icon" href="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/Grinning%20cat/3D/grinning_cat_3d.png">
   <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/Grinning%20cat/3D/grinning_cat_3d.png">
   <meta name="apple-mobile-web-app-title" content="예산 디펜스"> 
@@ -640,9 +640,28 @@ let listHtml = state.bosses.map(b => {
           <div class="speech-bubble flip-down" style="${heroBubbleStyle}"></div> 
         </div>`;
 
-// ✨ 3. 맵 경로를 부드러운 곡선(라운드 코너)으로 깎아내는 로직!
-      const radius = 25; // 꺾이는 부분의 둥글기 (숫자를 키우면 더 둥글어집니다)
+// ✨ 3. 곡선을 그리기 위해 선분과 곡선(Q) 정보를 모두 저장하는 업그레이드 마법!
+      const radius = 25; 
+      let segments = []; 
+      let totalPathLength = 0;
+      let lastPoint = mapCoordinates[0];
+
+      // 두 점 사이의 거리를 구하는 마법
+      const getDist = (p1, p2) => Math.sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2);
       
+      // 베지어 곡선의 길이를 근사치로 구하는 마법 (10개로 쪼개서 길이 덧셈)
+      const getCurveLength = (p0, p1, p2) => {
+        let len = 0; let prev = p0;
+        for (let t = 0.1; t <= 1; t += 0.1) {
+          let cx = (1-t)**2 * p0.x + 2*(1-t)*t * p1.x + t**2 * p2.x;
+          let cy = (1-t)**2 * p0.y + 2*(1-t)*t * p1.y + t**2 * p2.y;
+          let curr = {x: cx, y: cy};
+          len += getDist(prev, curr);
+          prev = curr;
+        }
+        return len;
+      };
+
       for(let i=1; i < mapCoordinates.length - 1; i++) { 
         let p0 = mapCoordinates[i-1], p1 = mapCoordinates[i], p2 = mapCoordinates[i+1];
         
@@ -651,7 +670,6 @@ let listHtml = state.bosses.map(b => {
         let dx2 = p2.x - p1.x, dy2 = p2.y - p1.y;
         let len2 = Math.sqrt(dx2*dx2 + dy2*dy2);
         
-        // 선분이 너무 짧으면 곡선 반지름을 조절
         let r1 = Math.min(radius, len1 / 2);
         let r2 = Math.min(radius, len2 / 2);
         
@@ -660,22 +678,28 @@ let listHtml = state.bosses.map(b => {
         let qx2 = p1.x + (dx2/len2) * r2;
         let qy2 = p1.y + (dy2/len2) * r2;
         
-        // 모서리 직전까지 직선(L)을 긋고 -> 모서리에서 베지어 곡선(Q)으로 부드럽게 턴!
-        pathD += `L ${qx1} ${qy1} Q ${p1.x} ${p1.y} ${qx2} ${qy2} `;
-      }
-      // 마지막 좌표 연결
-      pathD += `L ${mapCoordinates[mapCoordinates.length-1].x} ${mapCoordinates[mapCoordinates.length-1].y}`;
-      mapPath.setAttribute('d', pathD.trim());
+        // 직선 구간 추가
+        let distL = getDist(lastPoint, {x:qx1, y:qy1});
+        segments.push({ type: 'L', p1: lastPoint, p2: {x:qx1, y:qy1}, dist: distL, cumDist: totalPathLength });
+        totalPathLength += distL;
+        
+        // 곡선 구간 추가
+        let distQ = getCurveLength({x:qx1, y:qy1}, p1, {x:qx2, y:qy2});
+        segments.push({ type: 'Q', p0: {x:qx1, y:qy1}, p1: p1, p2: {x:qx2, y:qy2}, dist: distQ, cumDist: totalPathLength });
+        totalPathLength += distQ;
 
-      let segments = [];
-      let totalPathLength = 0;
-      for (let i = 0; i < mapCoordinates.length - 1; i++) {
-        let p1 = mapCoordinates[i], p2 = mapCoordinates[i+1];
-        let dx = p2.x - p1.x, dy = p2.y - p1.y;
-        let dist = Math.sqrt(dx * dx + dy * dy);
-        segments.push({ p1, p2, dist, cumDist: totalPathLength });
-        totalPathLength += dist;
+        pathD += `L ${qx1} ${qy1} Q ${p1.x} ${p1.y} ${qx2} ${qy2} `;
+        lastPoint = {x:qx2, y:qy2};
       }
+      
+      // 마지막 남은 직선 구간 추가
+      let endPoint = mapCoordinates[mapCoordinates.length-1];
+      let finalDist = getDist(lastPoint, endPoint);
+      segments.push({ type: 'L', p1: lastPoint, p2: endPoint, dist: finalDist, cumDist: totalPathLength });
+      totalPathLength += finalDist;
+
+      pathD += `L ${endPoint.x} ${endPoint.y}`;
+      mapPath.setAttribute('d', pathD.trim());
 
       const todayObj = parseDateToNoon(getTodayDateString());
       const allBosses = state.bosses;
@@ -683,7 +707,13 @@ let listHtml = state.bosses.map(b => {
       const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.85); 
       const assignedRatios = []; 
 
-      allBosses.forEach((boss) => {
+      // ✨ 변경 1: D-DAY가 지난 몹(토벌된 몹)은 맵에 그리지 않음!
+      const activeBosses = allBosses.filter(boss => {
+        const targetObj = parseDateToNoon(boss.targetDate);
+        return Math.round((targetObj - todayObj) / 86400000) >= 0; // D-0 이거나 아직 안 지난 것만 남김!
+      });
+
+      activeBosses.forEach((boss) => {
         const targetObj = parseDateToNoon(boss.targetDate);
         let diffDays = Math.max(0, Math.round((targetObj - todayObj) / 86400000));
         let scaledDays = Math.pow(diffDays, 0.85); 
@@ -700,11 +730,17 @@ let listHtml = state.bosses.map(b => {
         let posX = mapCoordinates[mapCoordinates.length - 1].x;
         let posY = mapCoordinates[mapCoordinates.length - 1].y;
 
+        // ✨ 변경 2: 몹을 직선(L)과 곡선(Q) 위에 정확히 배치하는 마법!
         for (let seg of segments) {
           if (targetDist >= seg.cumDist && targetDist <= seg.cumDist + seg.dist) {
             let t = (targetDist - seg.cumDist) / seg.dist;
-            posX = seg.p1.x + t * (seg.p2.x - seg.p1.x);
-            posY = seg.p1.y + t * (seg.p2.y - seg.p1.y);
+            if (seg.type === 'L') {
+              posX = seg.p1.x + t * (seg.p2.x - seg.p1.x);
+              posY = seg.p1.y + t * (seg.p2.y - seg.p1.y);
+            } else if (seg.type === 'Q') {
+              posX = (1-t)**2 * seg.p0.x + 2*(1-t)*t * seg.p1.x + t**2 * seg.p2.x;
+              posY = (1-t)**2 * seg.p0.y + 2*(1-t)*t * seg.p1.y + t**2 * seg.p2.y;
+            }
             break;
           }
         }
@@ -721,6 +757,15 @@ let listHtml = state.bosses.map(b => {
             <div class="node-emoji">${getEmojiImage(boss.emoji)}</div>
             <div class="${bubbleClass}" style="${bubbleStyle}">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
           </div>`;
+      });
+      
+      // ✨ 3. 경로의 끝 부분(마지막 좌표)에 붉은색 보물 마크(X) 표시!
+      let endX = mapCoordinates[mapCoordinates.length - 1].x;
+      let endY = mapCoordinates[mapCoordinates.length - 1].y;
+      mapNodesContainer.innerHTML += `
+        <div class="map-node" style="left: ${endX}%; top: ${endY}%; z-index: 1; pointer-events: none; animation: none;">
+          <div style="font-family: 'Shadows Into Light', 'Caveat', cursive; font-size: 50px; font-weight: 900; color: #b32424; opacity: 0.8; transform: rotate(-10deg);">X</div>
+        </div>`;
       });
     }
 
