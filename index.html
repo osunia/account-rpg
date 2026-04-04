@@ -766,8 +766,6 @@ let listHtml = state.bosses.map(b => {
         <div class="map-node" style="left: ${endX}%; top: ${endY}%; z-index: 1; pointer-events: none; animation: none;">
           <div style="font-family: 'Shadows Into Light', 'Caveat', cursive; font-size: 50px; font-weight: 900; color: #b32424; opacity: 0.8; transform: rotate(-10deg);">X</div>
         </div>`;
-      });
-    }
 
     function closeAllBubbles() {
       document.querySelectorAll('.map-node, .hero-node').forEach(n => {
