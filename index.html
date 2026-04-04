@@ -571,25 +571,36 @@ const monsterDic = [
     function render() {
       document.getElementById('manaDisplay').innerText = `${state.currentMana.toLocaleString()} 원`;
       if(!state.bosses) state.bosses = [];
-// ✨ 3. 정렬할 때도 완벽하게 날짜를 인식하도록 교체!
+      // ✨ 3. 정렬할 때도 완벽하게 날짜를 인식하도록 교체!
       state.bosses.sort((a, b) => parseDateToNoon(a.targetDate) - parseDateToNoon(b.targetDate));
       
       const mainBossArea = document.getElementById('mainBossArea');
       const mapNodesContainer = document.getElementById('mapNodesContainer');
       const mapPath = document.getElementById('mapPath');
       mapNodesContainer.innerHTML = '';
+
+      // ✨ 1. 렌더링 시작부터 '오늘 이후(D-0 이상)'인 활성 몹들만 걸러냅니다! 
+      // (원본 state.bosses는 건드리지 않아서 시트에는 보존됩니다냥)
+      const todayObj = parseDateToNoon(getTodayDateString());
+      const activeBosses = state.bosses.filter(boss => {
+        const targetObj = parseDateToNoon(boss.targetDate);
+        return Math.round((targetObj - todayObj) / 86400000) >= 0;
+      });
       
-      if (state.bosses.length === 0) {
+      // ✨ 2. state.bosses 대신 필터링된 activeBosses를 기준으로 검사합니다.
+      if (activeBosses.length === 0) {
         mainBossArea.innerHTML = `<div style="text-align:center; font-weight:bold; padding:10px;">평화롭습니다. 보스가 없어요! 🕊️</div>`;
         document.getElementById('manaBar').style.width = '100%';
         mapPath.setAttribute('d', ''); return;
       }
 
-      const mainBoss = state.bosses[0];
+      // ✨ 3. 메인 보스 카드도 걸러진 목록의 첫 번째 몹으로 지정!
+      const mainBoss = activeBosses[0];
       let percent = (state.currentMana / mainBoss.hp) * 100;
       document.getElementById('manaBar').style.width = `${Math.min(percent, 100)}%`;
 
-let listHtml = state.bosses.map(b => {
+      // ✨ 4. 리스트 목록에도 걸러진 activeBosses만 뿌려줍니다!
+      let listHtml = activeBosses.map(b => {
         // ✨ 4. 무식한 절단기 대신 예쁜 포맷 필터 적용!
         const cleanDate = formatDateString(b.targetDate);
         return `
@@ -701,17 +712,10 @@ let listHtml = state.bosses.map(b => {
       pathD += `L ${endPoint.x} ${endPoint.y}`;
       mapPath.setAttribute('d', pathD.trim());
 
-      const todayObj = parseDateToNoon(getTodayDateString());
-      const allBosses = state.bosses;
+      // ✨ 이미 함수 맨 위에서 activeBosses를 구했으니 깔끔하게 변수 세팅만 남깁니다!
       const HORIZON_DAYS = 30; 
       const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.85); 
       const assignedRatios = []; 
-
-      // ✨ 변경 1: D-DAY가 지난 몹(토벌된 몹)은 맵에 그리지 않음!
-      const activeBosses = allBosses.filter(boss => {
-        const targetObj = parseDateToNoon(boss.targetDate);
-        return Math.round((targetObj - todayObj) / 86400000) >= 0; // D-0 이거나 아직 안 지난 것만 남김!
-      });
 
       activeBosses.forEach((boss) => {
         const targetObj = parseDateToNoon(boss.targetDate);
@@ -759,9 +763,16 @@ let listHtml = state.bosses.map(b => {
           </div>`;
       });
       
-      // ✨ 3. 경로의 끝 부분(마지막 좌표)에 붉은색 보물 마크(X) 표시!
+// ✨ 3. 경로의 끝 부분(마지막 좌표)에 붉은색 보물 마크(X) 표시!
       let endX = mapCoordinates[mapCoordinates.length - 1].x;
       let endY = mapCoordinates[mapCoordinates.length - 1].y;
+      
+      // 🎯 X마크 영점 조준 (여기 숫자를 미세 조정하세요!)
+      // endX: +를 하면 오른쪽, -를 하면 왼쪽으로 이동
+      // endY: +를 하면 아래쪽, -를 하면 위쪽으로 이동
+      endX = endX + 1.5;  // (오른쪽으로 살짝 이동)
+      endY = endY - 2.5;  // (위쪽으로 살짝 이동)
+
       mapNodesContainer.innerHTML += `
         <div class="map-node" style="left: ${endX}%; top: ${endY}%; z-index: 1; pointer-events: none; animation: none;">
           <div style="font-family: 'Shadows Into Light', 'Caveat', cursive; font-size: 50px; font-weight: 900; color: #b32424; opacity: 0.8; transform: rotate(-10deg);">X</div>
