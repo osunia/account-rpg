@@ -772,7 +772,7 @@ const monsterDic = [
 
         mapNodesContainer.innerHTML += `
           <div class="map-node" style="left: ${posX}%; top: ${posY}%;" onclick="toggleBubble(this, event)">
-            <div class="node-emoji" style="position: relative; z-index: ${zIndex};">${getEmojiImage(boss.emoji)}</div>
+            <div class="node-emoji" style="position: relative;">${getEmojiImage(boss.emoji)}</div>
             <div class="${bubbleClass}" style="${bubbleStyle} z-index: 100;">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
           </div>`;
       });
