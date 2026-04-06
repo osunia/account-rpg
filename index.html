@@ -571,7 +571,8 @@ const monsterDic = [
     function render() {
       document.getElementById('manaDisplay').innerText = `${state.currentMana.toLocaleString()} 원`;
       if(!state.bosses) state.bosses = [];
-      // ✨ 3. 정렬할 때도 완벽하게 날짜를 인식하도록 교체!
+      
+      // ✨ 1. 정렬
       state.bosses.sort((a, b) => parseDateToNoon(a.targetDate) - parseDateToNoon(b.targetDate));
       
       const mainBossArea = document.getElementById('mainBossArea');
@@ -579,29 +580,28 @@ const monsterDic = [
       const mapPath = document.getElementById('mapPath');
       mapNodesContainer.innerHTML = '';
 
-      // ✨ 1. 렌더링 시작부터 '오늘 이후(D-0 이상)'인 활성 몹들만 걸러냅니다! 
-      // (원본 state.bosses는 건드리지 않아서 시트에는 보존됩니다냥)
+      // ✨ 2. 가장 먼저! 오늘 이후(D-0 이상) 몹만 걸러서 화면(리스트, 맵) 전체의 기준으로 삼습니다!
       const todayObj = parseDateToNoon(getTodayDateString());
       const activeBosses = state.bosses.filter(boss => {
         const targetObj = parseDateToNoon(boss.targetDate);
         return Math.round((targetObj - todayObj) / 86400000) >= 0;
       });
-      
-      // ✨ 2. state.bosses 대신 필터링된 activeBosses를 기준으로 검사합니다.
+
+      // 남은 보스가 없다면 평화 선언
       if (activeBosses.length === 0) {
         mainBossArea.innerHTML = `<div style="text-align:center; font-weight:bold; padding:10px;">평화롭습니다. 보스가 없어요! 🕊️</div>`;
         document.getElementById('manaBar').style.width = '100%';
-        mapPath.setAttribute('d', ''); return;
+        mapPath.setAttribute('d', ''); 
+        return;
       }
 
-      // ✨ 3. 메인 보스 카드도 걸러진 목록의 첫 번째 몹으로 지정!
+      // ✨ 3. 걸러진 몹 중 첫 번째가 무조건 메인 보스!
       const mainBoss = activeBosses[0];
       let percent = (state.currentMana / mainBoss.hp) * 100;
       document.getElementById('manaBar').style.width = `${Math.min(percent, 100)}%`;
 
-      // ✨ 4. 리스트 목록에도 걸러진 activeBosses만 뿌려줍니다!
+      // ✨ 4. 리스트에도 걸러진 몹만 출력! (과거 몹 완전 은폐)
       let listHtml = activeBosses.map(b => {
-        // ✨ 4. 무식한 절단기 대신 예쁜 포맷 필터 적용!
         const cleanDate = formatDateString(b.targetDate);
         return `
         <div class="boss-list-item">
@@ -651,16 +651,13 @@ const monsterDic = [
           <div class="speech-bubble flip-down" style="${heroBubbleStyle}"></div> 
         </div>`;
 
-// ✨ 3. 곡선을 그리기 위해 선분과 곡선(Q) 정보를 모두 저장하는 업그레이드 마법!
+      // 맵 곡선 그리기 준비
       const radius = 25; 
       let segments = []; 
       let totalPathLength = 0;
       let lastPoint = mapCoordinates[0];
 
-      // 두 점 사이의 거리를 구하는 마법
       const getDist = (p1, p2) => Math.sqrt((p2.x - p1.x)**2 + (p2.y - p1.y)**2);
-      
-      // 베지어 곡선의 길이를 근사치로 구하는 마법 (10개로 쪼개서 길이 덧셈)
       const getCurveLength = (p0, p1, p2) => {
         let len = 0; let prev = p0;
         for (let t = 0.1; t <= 1; t += 0.1) {
@@ -689,12 +686,10 @@ const monsterDic = [
         let qx2 = p1.x + (dx2/len2) * r2;
         let qy2 = p1.y + (dy2/len2) * r2;
         
-        // 직선 구간 추가
         let distL = getDist(lastPoint, {x:qx1, y:qy1});
         segments.push({ type: 'L', p1: lastPoint, p2: {x:qx1, y:qy1}, dist: distL, cumDist: totalPathLength });
         totalPathLength += distL;
         
-        // 곡선 구간 추가
         let distQ = getCurveLength({x:qx1, y:qy1}, p1, {x:qx2, y:qy2});
         segments.push({ type: 'Q', p0: {x:qx1, y:qy1}, p1: p1, p2: {x:qx2, y:qy2}, dist: distQ, cumDist: totalPathLength });
         totalPathLength += distQ;
@@ -703,7 +698,6 @@ const monsterDic = [
         lastPoint = {x:qx2, y:qy2};
       }
       
-      // 마지막 남은 직선 구간 추가
       let endPoint = mapCoordinates[mapCoordinates.length-1];
       let finalDist = getDist(lastPoint, endPoint);
       segments.push({ type: 'L', p1: lastPoint, p2: endPoint, dist: finalDist, cumDist: totalPathLength });
@@ -712,29 +706,41 @@ const monsterDic = [
       pathD += `L ${endPoint.x} ${endPoint.y}`;
       mapPath.setAttribute('d', pathD.trim());
 
-      // ✨ 이미 함수 맨 위에서 activeBosses를 구했으니 깔끔하게 변수 세팅만 남깁니다!
+      // 몹 배치 로직
       const HORIZON_DAYS = 30; 
       const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.85); 
+      
+      // ✨ 겹침 방지를 위한 마법 변수들!
       const assignedRatios = []; 
+      const minDistance = 0.04; // 몹 사이의 최소 간격 (이 숫자를 키우면 몹들이 더 멀리 떨어집니다)
 
-      activeBosses.forEach((boss) => {
+      // activeBosses 배열을 돌면서 z-index도 같이 세팅합니다.
+      activeBosses.forEach((boss, index) => {
         const targetObj = parseDateToNoon(boss.targetDate);
         let diffDays = Math.max(0, Math.round((targetObj - todayObj) / 86400000));
-        let scaledDays = Math.pow(diffDays, 0.85); 
-        let ratio = Math.min(1, scaledDays / maxScaledHorizon);
         
-        let conflictCount = assignedRatios.filter(r => Math.abs(r - ratio) < 0.035).length;
-        if (conflictCount > 0) {
-          ratio += (conflictCount * 0.035);
-          if(ratio > 1) ratio = 1;
+        // 날짜에 따른 기본 비율 계산 (30일이 넘어가도 비율이 1을 넘어 계속 뒤로 밀리게 합니다)
+        let ratio = Math.pow(diffDays, 0.85) / maxScaledHorizon;
+
+        // ✨ 겹침 밀어내기 마법!
+        for (let i = 0; i < assignedRatios.length; i++) {
+          if (Math.abs(assignedRatios[i] - ratio) < minDistance) {
+            // 거리가 너무 가깝다면 강제로 minDistance 만큼 뒤로 밉니다.
+            ratio = assignedRatios[i] + minDistance;
+          }
         }
+        
+        // 비율이 1(끝점)을 넘어가면 0.99에 가두지만, 겹치면 계속 뒤로 밀려서 결국 1에 다닥다닥 붙는 걸 방지!
+        if (ratio > 0.95) {
+            ratio = 0.95 - (0.01 * index); // 끝에 몰린 애들은 역으로 조금씩 앞으로 당겨서 겹침 방지!
+        }
+        
         assignedRatios.push(ratio);
 
-        let targetDist = totalPathLength * (0.03 + (ratio * 0.97));
+        let targetDist = totalPathLength * (0.05 + (ratio * 0.95)); // 시작점(고양이)에서 약간 떨어지게 0.05부터 시작
         let posX = mapCoordinates[mapCoordinates.length - 1].x;
         let posY = mapCoordinates[mapCoordinates.length - 1].y;
 
-        // ✨ 변경 2: 몹을 직선(L)과 곡선(Q) 위에 정확히 배치하는 마법!
         for (let seg of segments) {
           if (targetDist >= seg.cumDist && targetDist <= seg.cumDist + seg.dist) {
             let t = (targetDist - seg.cumDist) / seg.dist;
@@ -756,23 +762,20 @@ const monsterDic = [
         let bubbleClass = "speech-bubble";
         if (posY < 25) bubbleClass += " flip-down";
 
+        // ✨ z-index 마법: 앞에 있는(날짜가 빠른) 몹일수록 z-index가 높아서 위로 올라옵니다!
+        let zIndex = 50 - index;
+
         mapNodesContainer.innerHTML += `
-          <div class="map-node" style="left: ${posX}%; top: ${posY}%;" onclick="toggleBubble(this, event)">
+          <div class="map-node" style="left: ${posX}%; top: ${posY}%; z-index: ${zIndex};" onclick="toggleBubble(this, event)">
             <div class="node-emoji">${getEmojiImage(boss.emoji)}</div>
             <div class="${bubbleClass}" style="${bubbleStyle}">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
           </div>`;
       });
       
-// ✨ 3. 경로의 끝 부분(마지막 좌표)에 붉은색 보물 마크(X) 표시!
-      let endX = mapCoordinates[mapCoordinates.length - 1].x;
-      let endY = mapCoordinates[mapCoordinates.length - 1].y;
+      // 경로의 끝 부분(마지막 좌표)에 붉은색 보물 마크(X) 표시!
+      let endX = mapCoordinates[mapCoordinates.length - 1].x + 2;
+      let endY = mapCoordinates[mapCoordinates.length - 1].y - 3;
       
-      // 🎯 X마크 영점 조준 (여기 숫자를 미세 조정하세요!)
-      // endX: +를 하면 오른쪽, -를 하면 왼쪽으로 이동
-      // endY: +를 하면 아래쪽, -를 하면 위쪽으로 이동
-      endX = endX + 2;  // (오른쪽으로 살짝 이동)
-      endY = endY - 3;  // (위쪽으로 살짝 이동)
-
       mapNodesContainer.innerHTML += `
         <div class="map-node" style="left: ${endX}%; top: ${endY}%; z-index: 1; pointer-events: none; animation: none;">
           <div style="font-family: 'Shadows Into Light', 'Caveat', cursive; font-size: 50px; font-weight: 900; color: #b32424; opacity: 0.8; transform: rotate(-10deg);">X</div>
