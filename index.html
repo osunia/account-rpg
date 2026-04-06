@@ -643,19 +643,15 @@ const monsterDic = [
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
       let heroBubbleStyle = "left: 10px; right: auto; transform: none; z-index: 110;"; // 영웅 말풍선 최상단
       
-// ✨ 이모지의 층(Z)과 말풍선의 층(Z)을 완벽 분리!
-        // 이모지: 가까울수록 앞쪽(50~20) / 말풍선: 무조건 최상단(100)
-        let zIndex = 50 - index;
+      // 🐱 1. 영웅(고양이) 노드 복구!
+      mapNodesContainer.innerHTML += `
+        <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%; z-index: 50;" onclick="toggleHeroBubble(this, event)">
+          ${getEmojiImage("😺")}
+          ${getEmojiImage("🗡️", "weapon")}
+          <div class="speech-bubble flip-down" style="${heroBubbleStyle}"></div> 
+        </div>`;
 
-        // 🛠️ 수정된 부분: z-index 속성을 .node-emoji 안에서 .map-node (부모)의 style로 옮겼습니다!
-        mapNodesContainer.innerHTML += `
-          <div class="map-node" style="left: ${posX}%; top: ${posY}%; z-index: ${zIndex};" onclick="toggleBubble(this, event)">
-            <div class="node-emoji" style="position: relative;">${getEmojiImage(boss.emoji)}</div>
-            <div class="${bubbleClass}" style="${bubbleStyle} z-index: 100;">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
-          </div>`;
-      });
-
-      // 맵 곡선 그리기 준비
+      // 🗺️ 2. 맵 곡선 그리기 준비
       const radius = 25; 
       let segments = []; 
       let totalPathLength = 0;
@@ -709,7 +705,7 @@ const monsterDic = [
       pathD += `L ${endPoint.x} ${endPoint.y}`;
       mapPath.setAttribute('d', pathD.trim());
 
-      // 몹 배치 로직
+      // 👾 3. 몹 배치 로직
       const todayObj = parseDateToNoon(getTodayDateString());
       const HORIZON_DAYS = 30; 
       const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.85); 
@@ -723,18 +719,14 @@ const monsterDic = [
         
         let ratio = Math.pow(diffDays, 0.85) / maxScaledHorizon;
 
-        // ✨ 먼 일정(31일 이상)과 겹침 방지 밀어내기 개선
         if (ratio > 0.93) {
-            // 맵 끝자락에 오밀조밀하게(5마리씩) 겹쳐 세우는 마법
             ratio = 0.93 + ((index % 5) * 0.008); 
         } else {
-            // 일반 거리 겹침 방지 (서로 거리를 둡니다)
             for (let i = 0; i < assignedRatios.length; i++) {
               if (Math.abs(assignedRatios[i] - ratio) < minDistance) {
                 ratio = assignedRatios[i] + minDistance;
               }
             }
-            // 밀어내다 보니 맵 밖으로 나가려 하면 끝자락에 강제 수용!
             if (ratio > 0.93) {
                 ratio = 0.93 + ((index % 5) * 0.008);
             }
@@ -767,11 +759,11 @@ const monsterDic = [
         if (posY < 25) bubbleClass += " flip-down";
 
         // ✨ 이모지의 층(Z)과 말풍선의 층(Z)을 완벽 분리!
-        // 이모지: 가까울수록 앞쪽(50~20) / 말풍선: 무조건 최상단(100)
         let zIndex = 50 - index;
 
+        // 🛠️ z-index를 .map-node (부모 컨테이너)에 제대로 적용 완료!
         mapNodesContainer.innerHTML += `
-          <div class="map-node" style="left: ${posX}%; top: ${posY}%;" onclick="toggleBubble(this, event)">
+          <div class="map-node" style="left: ${posX}%; top: ${posY}%; z-index: ${zIndex};" onclick="toggleBubble(this, event)">
             <div class="node-emoji" style="position: relative;">${getEmojiImage(boss.emoji)}</div>
             <div class="${bubbleClass}" style="${bubbleStyle} z-index: 100;">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
           </div>`;
