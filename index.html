@@ -142,7 +142,7 @@
     .hero-weapon { width: 30px !important; height: 30px !important; position: absolute; right: -15px; bottom: 5px; z-index: -1; transform: scale(-1, -1) rotate(10deg) !important; filter: drop-shadow(-2px -2px 0px var(--black)) !important; animation: none !important; }
 
 /* ✨ 1. 애니메이션을 아이콘이 아니라 컨테이너 전체(.map-node)로 옮깁니다! */
-    .map-node { position: absolute; margin-left: -20px; margin-top: -20px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; font-size: 40px; animation: float 2.5s ease-in-out infinite; }
+    .map-node { position: absolute; margin-left: -20px; margin-top: -20px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 40px; animation: float 2.5s ease-in-out infinite; }
     
     /* ✨ 2. 아이콘 자체의 애니메이션은 빼고, 클릭 시 부드러운 축소를 위해 transition만 남깁니다 */
     .node-emoji { width: 45px; height: 45px; transition: transform 0.1s; }
@@ -580,11 +580,10 @@ const monsterDic = [
       const mapPath = document.getElementById('mapPath');
       mapNodesContainer.innerHTML = '';
 
-      // ✨ 2. 가장 먼저! 오늘 이후(D-0 이상) 몹만 걸러서 화면(리스트, 맵) 전체의 기준으로 삼습니다!
-      const todayObj = parseDateToNoon(getTodayDateString());
+      // ✨ 2. 과거 일정(D+1, D+2...) 100% 완벽 차단! (화면에 D+로 표시되는 것들 제거)
       const activeBosses = state.bosses.filter(boss => {
-        const targetObj = parseDateToNoon(boss.targetDate);
-        return Math.round((targetObj - todayObj) / 86400000) >= 0;
+        const ddayText = calculateDday(boss.targetDate);
+        return !ddayText.startsWith('D+'); 
       });
 
       // 남은 보스가 없다면 평화 선언
@@ -595,12 +594,12 @@ const monsterDic = [
         return;
       }
 
-      // ✨ 3. 걸러진 몹 중 첫 번째가 무조건 메인 보스!
+      // ✨ 3. 메인 보스 카드 세팅
       const mainBoss = activeBosses[0];
       let percent = (state.currentMana / mainBoss.hp) * 100;
       document.getElementById('manaBar').style.width = `${Math.min(percent, 100)}%`;
 
-      // ✨ 4. 리스트에도 걸러진 몹만 출력! (과거 몹 완전 은폐)
+      // ✨ 4. 리스트 출력
       let listHtml = activeBosses.map(b => {
         const cleanDate = formatDateString(b.targetDate);
         return `
@@ -642,10 +641,10 @@ const monsterDic = [
       `;
 
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
-      let heroBubbleStyle = "left: 10px; right: auto; transform: none;";
+      let heroBubbleStyle = "left: 10px; right: auto; transform: none; z-index: 110;"; // 영웅 말풍선 최상단
       
       mapNodesContainer.innerHTML += `
-        <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%;" onclick="toggleHeroBubble(this, event)">
+        <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%; z-index: 50;" onclick="toggleHeroBubble(this, event)">
           ${getEmojiImage("😺")}
           ${getEmojiImage("🗡️", "weapon")}
           <div class="speech-bubble flip-down" style="${heroBubbleStyle}"></div> 
@@ -672,7 +671,6 @@ const monsterDic = [
 
       for(let i=1; i < mapCoordinates.length - 1; i++) { 
         let p0 = mapCoordinates[i-1], p1 = mapCoordinates[i], p2 = mapCoordinates[i+1];
-        
         let dx1 = p1.x - p0.x, dy1 = p1.y - p0.y;
         let len1 = Math.sqrt(dx1*dx1 + dy1*dy1);
         let dx2 = p2.x - p1.x, dy2 = p2.y - p1.y;
@@ -707,37 +705,38 @@ const monsterDic = [
       mapPath.setAttribute('d', pathD.trim());
 
       // 몹 배치 로직
+      const todayObj = parseDateToNoon(getTodayDateString());
       const HORIZON_DAYS = 30; 
       const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.85); 
       
-      // ✨ 겹침 방지를 위한 마법 변수들!
       const assignedRatios = []; 
-      const minDistance = 0.04; // 몹 사이의 최소 간격 (이 숫자를 키우면 몹들이 더 멀리 떨어집니다)
+      const minDistance = 0.04; 
 
-      // activeBosses 배열을 돌면서 z-index도 같이 세팅합니다.
       activeBosses.forEach((boss, index) => {
         const targetObj = parseDateToNoon(boss.targetDate);
         let diffDays = Math.max(0, Math.round((targetObj - todayObj) / 86400000));
         
-        // 날짜에 따른 기본 비율 계산 (30일이 넘어가도 비율이 1을 넘어 계속 뒤로 밀리게 합니다)
         let ratio = Math.pow(diffDays, 0.85) / maxScaledHorizon;
 
-        // ✨ 겹침 밀어내기 마법!
-        for (let i = 0; i < assignedRatios.length; i++) {
-          if (Math.abs(assignedRatios[i] - ratio) < minDistance) {
-            // 거리가 너무 가깝다면 강제로 minDistance 만큼 뒤로 밉니다.
-            ratio = assignedRatios[i] + minDistance;
-          }
+        // ✨ 먼 일정(31일 이상)과 겹침 방지 밀어내기 개선
+        if (ratio > 0.93) {
+            // 맵 끝자락에 오밀조밀하게(5마리씩) 겹쳐 세우는 마법
+            ratio = 0.93 + ((index % 5) * 0.008); 
+        } else {
+            // 일반 거리 겹침 방지 (서로 거리를 둡니다)
+            for (let i = 0; i < assignedRatios.length; i++) {
+              if (Math.abs(assignedRatios[i] - ratio) < minDistance) {
+                ratio = assignedRatios[i] + minDistance;
+              }
+            }
+            // 밀어내다 보니 맵 밖으로 나가려 하면 끝자락에 강제 수용!
+            if (ratio > 0.93) {
+                ratio = 0.93 + ((index % 5) * 0.008);
+            }
         }
-        
-        // 비율이 1(끝점)을 넘어가면 0.99에 가두지만, 겹치면 계속 뒤로 밀려서 결국 1에 다닥다닥 붙는 걸 방지!
-        if (ratio > 0.95) {
-            ratio = 0.95 - (0.01 * index); // 끝에 몰린 애들은 역으로 조금씩 앞으로 당겨서 겹침 방지!
-        }
-        
         assignedRatios.push(ratio);
 
-        let targetDist = totalPathLength * (0.05 + (ratio * 0.95)); // 시작점(고양이)에서 약간 떨어지게 0.05부터 시작
+        let targetDist = totalPathLength * (0.05 + (ratio * 0.95));
         let posX = mapCoordinates[mapCoordinates.length - 1].x;
         let posY = mapCoordinates[mapCoordinates.length - 1].y;
 
@@ -762,17 +761,18 @@ const monsterDic = [
         let bubbleClass = "speech-bubble";
         if (posY < 25) bubbleClass += " flip-down";
 
-        // ✨ z-index 마법: 앞에 있는(날짜가 빠른) 몹일수록 z-index가 높아서 위로 올라옵니다!
+        // ✨ 이모지의 층(Z)과 말풍선의 층(Z)을 완벽 분리!
+        // 이모지: 가까울수록 앞쪽(50~20) / 말풍선: 무조건 최상단(100)
         let zIndex = 50 - index;
 
         mapNodesContainer.innerHTML += `
-          <div class="map-node" style="left: ${posX}%; top: ${posY}%; z-index: ${zIndex};" onclick="toggleBubble(this, event)">
-            <div class="node-emoji">${getEmojiImage(boss.emoji)}</div>
-            <div class="${bubbleClass}" style="${bubbleStyle}">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
+          <div class="map-node" style="left: ${posX}%; top: ${posY}%;" onclick="toggleBubble(this, event)">
+            <div class="node-emoji" style="position: relative; z-index: ${zIndex};">${getEmojiImage(boss.emoji)}</div>
+            <div class="${bubbleClass}" style="${bubbleStyle} z-index: 100;">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
           </div>`;
       });
       
-      // 경로의 끝 부분(마지막 좌표)에 붉은색 보물 마크(X) 표시!
+      // X 마크 (경로 끝)
       let endX = mapCoordinates[mapCoordinates.length - 1].x + 2;
       let endY = mapCoordinates[mapCoordinates.length - 1].y - 3;
       
