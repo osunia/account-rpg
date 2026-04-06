@@ -151,9 +151,11 @@
     .map-node:nth-child(even) { animation-delay: -0.7s; }
     .map-node:nth-child(3n) { animation-delay: -1.4s; }
     
-    /* ✨ 4. 컨테이너를 누를 때 컨테이너 자체가 축소되면 애니메이션과 충돌하므로, 누를 땐 안쪽의 '아이콘'만 쏙 작아지게 합니다! */
+/* ✨ 4. 컨테이너를 누를 때 컨테이너 자체가 축소되면 애니메이션과 충돌하므로, 누를 땐 안쪽의 '아이콘'만 쏙 작아지게 합니다! */
     .map-node:active .node-emoji { transform: scale(0.9); }
-    .map-node.active { z-index: 50; }
+    
+    /* 🛠️ 수정된 부분: 클릭된 몹과 영웅은 무적 치트키(!important)로 제일 앞(200층)으로 튀어나옵니다! */
+    .map-node.active, .hero-node.active { z-index: 200 !important; }
 
     .boss-card-emoji { width: 22px; height: 22px; vertical-align: middle; margin-right: 5px; filter: drop-shadow(1px 1px 0 var(--black)); }
 
