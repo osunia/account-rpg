@@ -643,12 +643,17 @@ const monsterDic = [
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
       let heroBubbleStyle = "left: 10px; right: auto; transform: none; z-index: 110;"; // 영웅 말풍선 최상단
       
-      mapNodesContainer.innerHTML += `
-        <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%; z-index: 50;" onclick="toggleHeroBubble(this, event)">
-          ${getEmojiImage("😺")}
-          ${getEmojiImage("🗡️", "weapon")}
-          <div class="speech-bubble flip-down" style="${heroBubbleStyle}"></div> 
-        </div>`;
+// ✨ 이모지의 층(Z)과 말풍선의 층(Z)을 완벽 분리!
+        // 이모지: 가까울수록 앞쪽(50~20) / 말풍선: 무조건 최상단(100)
+        let zIndex = 50 - index;
+
+        // 🛠️ 수정된 부분: z-index 속성을 .node-emoji 안에서 .map-node (부모)의 style로 옮겼습니다!
+        mapNodesContainer.innerHTML += `
+          <div class="map-node" style="left: ${posX}%; top: ${posY}%; z-index: ${zIndex};" onclick="toggleBubble(this, event)">
+            <div class="node-emoji" style="position: relative;">${getEmojiImage(boss.emoji)}</div>
+            <div class="${bubbleClass}" style="${bubbleStyle} z-index: 100;">${boss.name}<br>${calculateDday(boss.targetDate)} | ${boss.hp.toLocaleString()}원</div>
+          </div>`;
+      });
 
       // 맵 곡선 그리기 준비
       const radius = 25; 
