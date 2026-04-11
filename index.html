@@ -420,8 +420,21 @@
       </div>
     </div>
   </div>
-
   <script>
+    // ✨ 1. 리스트 스크롤 및 높이 고정을 위한 CSS 동적 주입 (HTML/CSS 수정 불필요)
+    const customScrollStyle = document.createElement('style');
+    customScrollStyle.innerHTML = `
+      #logListView {
+        max-height: 280px; /* 달력 모달과 비슷한 쾌적한 높이 */
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 5px;
+      }
+      #logListView::-webkit-scrollbar { width: 4px; }
+      #logListView::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    `;
+    document.head.appendChild(customScrollStyle);
+
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzEq8GmgpYUbqcgPmigVcgoCFcdqEPY_NaDjYe08wkUU1yPn1iRyQoEat2_FTMqtRNm/exec";
 
     let state = {
@@ -430,7 +443,7 @@
       bosses: [], logs: []
     };
 
-let currentCalDate = new Date(); 
+    let currentCalDate = new Date(); 
     
     // ✨ 지출 삭제용 인덱스 보관
     let logToDeleteIndex = -1;
@@ -454,7 +467,7 @@ let currentCalDate = new Date();
 
     const MS_EMOJI_BASE = "https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@latest/assets/";
     
-const monsterDic = [
+    const monsterDic = [
       // 👻 기존 몹들
       { name: "유령", emoji: "👻", img: "Ghost/3D/ghost_3d.png" }, 
       { name: "외계인", emoji: "👾", img: "Alien%20monster/3D/alien_monster_3d.png" }, 
@@ -517,7 +530,7 @@ const monsterDic = [
       return emojiStr; 
     }
 
-// ✨ 현재 날짜와 시간을 "2026-04-03 14:30:05" 형식으로 반환
+    // ✨ 현재 날짜와 시간을 "YYYY-MM-DD HH:MM:SS" 형식으로 반환
     function getNowDateTimeString() {
       const d = new Date();
       const date = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -531,14 +544,13 @@ const monsterDic = [
     function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
     function showAlert(msg) { document.getElementById('alertMessage').innerHTML = msg; document.getElementById('customAlert').style.display = 'flex'; }
 
-// ✨ 1. 어떤 날짜 형식이든 YYYY-MM-DD 로 예쁘게 바꿔주는 마법 함수
+    // ✨ 1. 어떤 날짜 형식이든 YYYY-MM-DD 로 예쁘게 바꿔주는 마법 함수
     function formatDateString(dStr) {
       if (!dStr) return "";
       const d = new Date(dStr);
       if (!isNaN(d.getTime())) {
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       }
-      // 구글 스프레드시트의 요상한 포맷까지 대비한 강력한 추출
       const match = String(dStr).match(/(\d{4})[^\d]+(\d{1,2})[^\d]+(\d{1,2})/);
       if (match) return `${match[1]}-${String(match[2]).padStart(2,'0')}-${String(match[3]).padStart(2,'0')}`;
       return String(dStr).substring(0, 10);
@@ -551,7 +563,6 @@ const monsterDic = [
       if (!isNaN(d.getTime())) {
         return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
       }
-      // 실패 시 정규식 추출 시도
       const match = String(dStr).match(/(\d{4})[^\d]+(\d{1,2})[^\d]+(\d{1,2})/);
       if (match) return new Date(match[1], match[2]-1, match[3], 12, 0, 0);
       return new Date();
@@ -574,7 +585,6 @@ const monsterDic = [
       document.getElementById('manaDisplay').innerText = `${state.currentMana.toLocaleString()} 원`;
       if(!state.bosses) state.bosses = [];
       
-      // ✨ 1. 정렬
       state.bosses.sort((a, b) => parseDateToNoon(a.targetDate) - parseDateToNoon(b.targetDate));
       
       const mainBossArea = document.getElementById('mainBossArea');
@@ -582,13 +592,11 @@ const monsterDic = [
       const mapPath = document.getElementById('mapPath');
       mapNodesContainer.innerHTML = '';
 
-      // ✨ 2. 과거 일정(D+1, D+2...) 100% 완벽 차단! (화면에 D+로 표시되는 것들 제거)
       const activeBosses = state.bosses.filter(boss => {
         const ddayText = calculateDday(boss.targetDate);
         return !ddayText.startsWith('D+'); 
       });
 
-      // 남은 보스가 없다면 평화 선언
       if (activeBosses.length === 0) {
         mainBossArea.innerHTML = `<div style="text-align:center; font-weight:bold; padding:10px;">평화롭습니다. 보스가 없어요! 🕊️</div>`;
         document.getElementById('manaBar').style.width = '100%';
@@ -596,12 +604,10 @@ const monsterDic = [
         return;
       }
 
-      // ✨ 3. 메인 보스 카드 세팅
       const mainBoss = activeBosses[0];
       let percent = (state.currentMana / mainBoss.hp) * 100;
       document.getElementById('manaBar').style.width = `${Math.min(percent, 100)}%`;
 
-      // ✨ 4. 리스트 출력
       let listHtml = activeBosses.map(b => {
         const cleanDate = formatDateString(b.targetDate);
         return `
@@ -643,9 +649,8 @@ const monsterDic = [
       `;
 
       let pathD = `M ${mapCoordinates[0].x} ${mapCoordinates[0].y} `;
-      let heroBubbleStyle = "left: 10px; right: auto; transform: none; z-index: 110;"; // 영웅 말풍선 최상단
+      let heroBubbleStyle = "left: 10px; right: auto; transform: none; z-index: 110;"; 
       
-      // 🐱 1. 영웅(고양이) 노드 복구!
       mapNodesContainer.innerHTML += `
         <div class="hero-node" style="left: ${mapCoordinates[0].x}%; top: ${mapCoordinates[0].y}%; z-index: 50;" onclick="toggleHeroBubble(this, event)">
           ${getEmojiImage("😺")}
@@ -653,7 +658,6 @@ const monsterDic = [
           <div class="speech-bubble flip-down" style="${heroBubbleStyle}"></div> 
         </div>`;
 
-      // 🗺️ 2. 맵 곡선 그리기 준비
       const radius = 25; 
       let segments = []; 
       let totalPathLength = 0;
@@ -707,7 +711,6 @@ const monsterDic = [
       pathD += `L ${endPoint.x} ${endPoint.y}`;
       mapPath.setAttribute('d', pathD.trim());
 
-      // 👾 3. 몹 배치 로직
       const todayObj = parseDateToNoon(getTodayDateString());
       const HORIZON_DAYS = 30; 
       const maxScaledHorizon = Math.pow(HORIZON_DAYS, 0.85); 
@@ -760,10 +763,8 @@ const monsterDic = [
         let bubbleClass = "speech-bubble";
         if (posY < 25) bubbleClass += " flip-down";
 
-        // ✨ 이모지의 층(Z)과 말풍선의 층(Z)을 완벽 분리!
         let zIndex = 50 - index;
 
-        // 🛠️ z-index를 .map-node (부모 컨테이너)에 제대로 적용 완료!
         mapNodesContainer.innerHTML += `
           <div class="map-node" style="left: ${posX}%; top: ${posY}%; z-index: ${zIndex};" onclick="toggleBubble(this, event)">
             <div class="node-emoji" style="position: relative;">${getEmojiImage(boss.emoji)}</div>
@@ -771,7 +772,6 @@ const monsterDic = [
           </div>`;
       });
       
-      // X 마크 (경로 끝)
       let endX = mapCoordinates[mapCoordinates.length - 1].x + 2;
       let endY = mapCoordinates[mapCoordinates.length - 1].y - 3;
       
@@ -868,27 +868,25 @@ const monsterDic = [
       return diff === 0 ? "D-DAY" : (diff > 0 ? `D-${diff}` : `D+${Math.abs(diff)}`);
     }
 
-    // ✨ 3. 기존 saveState() 함수를 이걸로 통째로 덮어쓰기 (자물쇠 걸기/풀기)
     function saveState() {
       localStorage.setItem('rpg_defense_state', JSON.stringify(state)); 
       
-      isCommunicating = true; // 🔒 통신 시작! 자물쇠 채움
+      isCommunicating = true; 
 
       fetch(GAS_URL, {
         method: 'POST', redirect: 'follow', 
         headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(state)
       })
       .then(response => {
-        isCommunicating = false; // 🔓 통신 성공! 자물쇠 풂
+        isCommunicating = false; 
       })
       .catch(err => { 
-        isCommunicating = false; // 🔓 에러 나도 일단 자물쇠 풂
+        isCommunicating = false; 
         console.error("서버 데이터 동기화 에러"); 
       });
     }
 
     function addBoss() {
-      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
       if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const nameInput = document.getElementById('newBossName').value.trim();
       const hpInput = parseInt(document.getElementById('newBossHp').value);
@@ -917,14 +915,12 @@ const monsterDic = [
       document.getElementById('editBossId').value = boss.id;
       document.getElementById('editBossName').value = extractEventName(boss.name, boss.emoji);
       document.getElementById('editBossHp').value = boss.hp;
-// ✨ 5. 수정창 열릴 때도 안전하게 날짜 형식 통일!
       document.getElementById('editBossDate').value = formatDateString(boss.targetDate);
       
       openModal('editBossModal');
     }
 
     function saveEditBoss() {
-      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
       if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const id = parseInt(document.getElementById('editBossId').value);
       const newName = document.getElementById('editBossName').value.trim();
@@ -952,7 +948,6 @@ const monsterDic = [
     }
 
     function executeDeleteBoss() {
-      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
       if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const id = parseInt(document.getElementById('deleteBossId').value);
       state.bosses = state.bosses.filter(b => b.id !== id);
@@ -962,7 +957,6 @@ const monsterDic = [
     }
 
     function attackBoss() {
-      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
       if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const amount = parseInt(document.getElementById('expenseAmount').value);
       const memo = document.getElementById('expenseMemo').value.trim() || "일반 공격";
@@ -977,9 +971,20 @@ const monsterDic = [
       showAlert(`🗡️ ${amount.toLocaleString()} 데미지 적중!`);
     }
 
-    // ✨ 드롭다운 아코디언 로직 (기록 수정/쪼개기)
+    // ✨ 드롭다운 아코디언 로직 (하나 열면 다른 건 닫히게 개선!)
     function toggleLogDetail(index) {
-      const panel = document.getElementById(`log-detail-${index}`);
+      // 1. 모든 패널을 찾아서 닫아줍니다 (단, 클릭한 본인 패널은 제외)
+      const allPanels = document.querySelectorAll('.log-detail-panel');
+      const targetPanelId = `log-detail-${index}`;
+      
+      allPanels.forEach(panel => {
+        if (panel.id !== targetPanelId) {
+          panel.style.maxHeight = null;
+        }
+      });
+
+      // 2. 클릭한 패널을 열거나 닫습니다
+      const panel = document.getElementById(targetPanelId);
       if (panel.style.maxHeight && panel.style.maxHeight !== '0px') {
         panel.style.maxHeight = null; // 닫기
       } else {
@@ -988,7 +993,6 @@ const monsterDic = [
       }
     }
 
-    // ✨ 세부 항목 추가 함수 (min-width:0 으로 너비 밀림 방어!)
     function addSplitRow(index) {
       const wrapper = document.getElementById(`split-wrapper-${index}`);
       const row = document.createElement('div');
@@ -1004,7 +1008,6 @@ const monsterDic = [
       calcSplit(index);
     }
 
-    // ✨ 총액과 쪼개진 금액을 실시간 계산하여 귀여운 "기타" 텍스트를 띄우는 마법
     function calcSplit(index) {
       const totalInput = document.getElementById(`log-amount-${index}`);
       const wrapper = document.getElementById(`split-wrapper-${index}`);
@@ -1033,9 +1036,7 @@ const monsterDic = [
       }
     }
 
-    // ✨ 지출 기록 및 쪼개기 저장
     function saveLogEdit(index) {
-      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
       if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const log = state.logs[index];
       const origAmount = log.amount;
@@ -1054,10 +1055,8 @@ const monsterDic = [
       let newLogs = [];
       
       if (rows.length === 0) {
-        // 쪼개기 없이 금액/메모만 수정한 경우
         newLogs.push({ date: origDate, amount: mainAmount, memo: mainMemo });
       } else {
-        // 쪼개기가 있는 경우 (영수증 방식)
         let sum = 0;
         let splitLogs = [];
         for(let row of rows) {
@@ -1080,11 +1079,9 @@ const monsterDic = [
         }
       }
       
-      // 마나 복구 및 재정산 마법 ✨
-      state.currentMana += origAmount; // 원래 깎였던 돈 환불!
-      state.currentMana -= mainAmount; // 새로 수정한 총액 깎기!
+      state.currentMana += origAmount; 
+      state.currentMana -= mainAmount; 
       
-      // splice 함수로 기존 1개 기록을 삭제하고, 쪼개진 N개의 기록으로 교체
       state.logs.splice(index, 1, ...newLogs); 
       
       render();
@@ -1093,17 +1090,15 @@ const monsterDic = [
       showAlert("지출 기록을 깔끔하게 정리했다냥! ✨");
     }
 
-    // ✨ 전용 삭제 모달 호출
     function confirmDeleteLog(index) {
       logToDeleteIndex = index;
       openModal('confirmDeleteLogModal');
     }
 
     function executeDeleteLog() {
-      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
       if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const log = state.logs[logToDeleteIndex];
-      state.currentMana += log.amount; // 마나 100% 환불
+      state.currentMana += log.amount; 
       state.logs.splice(logToDeleteIndex, 1);
       
       render();
@@ -1127,7 +1122,6 @@ const monsterDic = [
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
     function saveSettings() {
-      // ✨ 통신 중이면 튕겨내고 토스트 띄우기
       if (isCommunicating) { showToast("통신 중이다냥! 잠시 기다리라냥! 🐾"); return; }
       const newMana = parseInt(document.getElementById('setEditMana').value);
       if(!isNaN(newMana)) state.currentMana = newMana;
@@ -1157,7 +1151,6 @@ const monsterDic = [
         list.innerHTML = '<li class="log-item" style="justify-content:center;">기록이 없다냥!</li>';
       } else {
         sorted.forEach(l => {
-          // ✨ 새로 적용된 인라인 아코디언 드롭다운!
           list.innerHTML += `
             <li class="log-accordion-item">
               <div class="log-item-header" onclick="toggleLogDetail(${l.originalIndex})">
@@ -1200,9 +1193,8 @@ const monsterDic = [
       grid.querySelectorAll('.day-cell').forEach(e => e.remove());
       const dailyTotals = {};
       if(!state.logs) state.logs = [];
-state.logs.forEach(l => { 
+      state.logs.forEach(l => { 
         if(l.date) { 
-          // ✨ 수정: 서버에서 온 긴 날짜를 무조건 YYYY-MM-DD로 깨끗하게 만든 뒤에 쪼갭니다냥!
           const cleanDate = formatDateString(l.date);
           const [ly, lm, ld] = cleanDate.split('-'); 
           
